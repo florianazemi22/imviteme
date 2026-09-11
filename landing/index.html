@@ -1,0 +1,639 @@
+<!doctype html>
+<!--
+  Imvite pre-launch landing page.
+  Plain HTML + CSS. No build step, no framework, no npm, no third-party requests.
+  RTL smoke test: change dir="ltr" to dir="rtl" below and reload. See README.md.
+-->
+<html lang="en" dir="ltr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Imvite — digital invitations with RSVP, in any language</title>
+<meta name="description" content="Digital invitations for weddings and life events. Pick a theme, share a link and a QR code, and guests RSVP from their phone. Multi-day celebrations, any language and script, real RTL. Pay once.">
+<link rel="canonical" href="https://imvite.me/">
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="styles.css">
+
+<meta name="theme-color" content="#fbf7f2" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#16120f" media="(prefers-color-scheme: dark)">
+
+<!-- Open Graph -->
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Imvite">
+<meta property="og:url" content="https://imvite.me/">
+<meta property="og:title" content="Imvite — digital invitations with RSVP, in any language">
+<meta property="og:description" content="Pick a theme, add your details, share a link and a QR code. Guests RSVP from their phone. Multi-day celebrations, any language and script. Pay once.">
+<meta property="og:locale" content="en_GB">
+<!-- TODO: assets/og.png does not exist yet. Create a 1200x630 PNG (commissioned or
+     rendered from the theme tokens, per docs/architecture/07-link-previews.md) and
+     drop it at landing/assets/og.png before announcing this URL anywhere. -->
+<meta property="og:image" content="https://imvite.me/assets/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Imvite — digital invitations for weddings and life events.">
+
+<!-- Twitter / X -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Imvite — digital invitations with RSVP, in any language">
+<meta name="twitter:description" content="Share a link and a QR code. Guests RSVP from their phone. Multi-day celebrations, any language and script. Pay once.">
+<meta name="twitter:image" content="https://imvite.me/assets/og.png">
+<meta name="twitter:image:alt" content="Imvite — digital invitations for weddings and life events.">
+</head>
+<body>
+
+<a class="skip-link" href="#main">Skip to content</a>
+
+<header class="site-header">
+  <div class="shell header-row">
+    <a class="brand" href="#main" aria-label="Imvite, home">
+      <!-- Brand mark: authored SVG. Non-directional, so it never mirrors in RTL. -->
+      <svg class="icon brand-mark no-flip" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true" focusable="false">
+        <path d="M16 3.5c3.6 4 6.3 7.2 6.3 11.2A6.3 6.3 0 0 1 16 21a6.3 6.3 0 0 1-6.3-6.3c0-4 2.7-7.2 6.3-11.2Z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/>
+        <path d="M16 21v7.5M11 26h10" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+        <circle cx="16" cy="13.4" r="1.9" fill="currentColor"/>
+      </svg>
+      <span class="brand-word">Imvite</span>
+    </a>
+
+    <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="site-nav" hidden>
+      <svg class="icon no-flip" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" focusable="false">
+        <path d="M4 7h16M4 12h16M4 17h16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+      </svg>
+      <span>Menu</span>
+    </button>
+
+    <nav id="site-nav" class="site-nav" aria-label="Sections">
+      <ul>
+        <li><a href="#how">How it works</a></li>
+        <li><a href="#multi-day">Multi-day</a></li>
+        <li><a href="#languages">Languages</a></li>
+        <li><a href="#pricing">Pricing</a></li>
+        <li><a href="#faq">FAQ</a></li>
+      </ul>
+    </nav>
+  </div>
+</header>
+
+<main id="main">
+
+  <!-- ================= HERO ================= -->
+  <section class="hero" aria-labelledby="hero-title">
+    <div class="shell hero-grid">
+      <div class="hero-copy">
+        <p class="eyebrow">Pre-launch — we are building this now</p>
+        <h1 id="hero-title">Your whole celebration, in one invitation.</h1>
+        <p class="lede">
+          Pick a theme, add your details, and share a link with a QR code.
+          Guests open it on their phone and reply in under a minute — no app,
+          no account. Several days, several languages, one payment.
+        </p>
+
+        <form class="signup" action="/subscribe" method="post" data-signup>
+          <!--
+            PLACEHOLDER ENDPOINT. Swap action="/subscribe" for a real one
+            (Buttondown, Formspree, a Cloudflare Worker). See README.md.
+            Works as a plain POST with JavaScript disabled; JS only upgrades
+            it to an inline success message.
+          -->
+          <input type="hidden" name="source" value="hero">
+          <p class="hp" aria-hidden="true"><label>Leave this empty<input type="text" name="company" tabindex="-1" autocomplete="off"></label></p>
+
+          <div class="signup-row">
+            <div class="field">
+              <label for="email-hero">Email address</label>
+              <input id="email-hero" name="email" type="email" autocomplete="email" required
+                     placeholder="you@example.com" spellcheck="false">
+            </div>
+            <button class="btn btn-primary" type="submit">
+              <span>Tell me when it opens</span>
+              <svg class="icon" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" focusable="false">
+                <path d="M4 12h15M13 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </button>
+          </div>
+
+          <p class="consent">
+            <label>
+              <input type="checkbox" name="consent" value="yes" required>
+              <span>Email me once Imvite opens, and occasionally about progress. One
+              click unsubscribes. Nothing else, ever. <a href="#privacy">How we handle your
+              email</a>.</span>
+            </label>
+          </p>
+          <p class="form-status" role="status" data-status></p>
+        </form>
+
+        <p class="micro">First invitations go out to this list. No cookies and no trackers on this page.</p>
+      </div>
+
+      <div class="hero-art" aria-hidden="true">
+        <!--
+          Authored SVG only. No stock imagery anywhere on this page
+          (see docs/architecture/09-risks.md §9.5 on asset licensing).
+          The framed area is a placeholder for real COMMISSIONED photography
+          of a printed card / couple — see .photo-slot in styles.css.
+        -->
+        <div class="phone">
+          <div class="phone-screen">
+            <div class="card-invite">
+              <svg class="ornament" viewBox="0 0 120 24" width="120" height="24" aria-hidden="true" focusable="false">
+                <path d="M2 12h34M84 12h34" stroke="currentColor" stroke-width="1" fill="none" stroke-linecap="round"/>
+                <path d="M60 3c5 5 8 7 8 9s-3 4-8 9c-5-5-8-7-8-9s3-4 8-9Z" fill="none" stroke="currentColor" stroke-width="1"/>
+                <circle cx="44" cy="12" r="1.6" fill="currentColor"/>
+                <circle cx="76" cy="12" r="1.6" fill="currentColor"/>
+              </svg>
+              <p class="card-kicker">Together with their families</p>
+              <p class="card-names"><bdi>Arta &amp; Besnik</bdi></p>
+              <p class="card-date">Saturday, 18 July · Prishtina</p>
+              <!-- Photo slot: commissioned photography goes here. -->
+              <div class="photo-slot" role="img" aria-label="Placeholder for commissioned photography"></div>
+              <div class="card-days">
+                <span>Henna</span><span>Nikah</span><span>Reception</span>
+              </div>
+              <p class="card-rsvp">Will you join us?</p>
+              <div class="card-buttons"><span class="yes">Yes</span><span class="no">Sadly, no</span></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="qr-chip">
+          <!-- Decorative QR-shaped ornament, authored by hand. Not a scannable code. -->
+          <svg viewBox="0 0 42 42" width="64" height="64" aria-hidden="true" focusable="false">
+            <rect width="42" height="42" rx="4" fill="none"/>
+            <g fill="currentColor">
+              <path d="M4 4h10v10H4V4Zm2 2v6h6V6H6Z"/>
+              <path d="M28 4h10v10H28V4Zm2 2v6h6V6h-6Z"/>
+              <path d="M4 28h10v10H4V28Zm2 2v6h6v-6H6Z"/>
+              <rect x="18" y="4" width="3" height="3"/><rect x="18" y="10" width="3" height="3"/>
+              <rect x="23" y="7" width="3" height="3"/><rect x="18" y="16" width="3" height="3"/>
+              <rect x="4" y="18" width="3" height="3"/><rect x="10" y="18" width="3" height="3"/>
+              <rect x="24" y="18" width="3" height="3"/><rect x="30" y="18" width="3" height="3"/>
+              <rect x="35" y="22" width="3" height="3"/><rect x="18" y="24" width="3" height="3"/>
+              <rect x="24" y="28" width="3" height="3"/><rect x="30" y="31" width="3" height="3"/>
+              <rect x="18" y="35" width="3" height="3"/><rect x="24" y="35" width="3" height="3"/>
+              <rect x="35" y="35" width="3" height="3"/><rect x="30" y="24" width="3" height="3"/>
+            </g>
+          </svg>
+          <span>Print the code, keep the card</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= HOW IT WORKS ================= -->
+  <section id="how" class="band" aria-labelledby="how-title">
+    <div class="shell">
+      <p class="eyebrow">How it works</p>
+      <h2 id="how-title">Four steps, one evening.</h2>
+      <ol class="steps">
+        <li>
+          <span class="step-num" aria-hidden="true">1</span>
+          <h3>Choose a theme</h3>
+          <p>Build the whole invitation before you decide. Every field, every
+          photo, the live preview. Nothing is locked behind the checkout.</p>
+        </li>
+        <li>
+          <span class="step-num" aria-hidden="true">2</span>
+          <h3>Add your days and your guests</h3>
+          <p>One date or five. Paste your guest list straight from a spreadsheet
+          or your notes, in whatever alphabet you keep it in.</p>
+        </li>
+        <li>
+          <span class="step-num" aria-hidden="true">3</span>
+          <h3>Publish and share</h3>
+          <p>You get a link, a link preview with your names on it, and a QR code
+          for the printed cards. Send it in the family group or one household at
+          a time.</p>
+        </li>
+        <li>
+          <span class="step-num" aria-hidden="true">4</span>
+          <h3>Watch the replies arrive</h3>
+          <p>Seats confirmed per day, per household, with a message from each
+          family. Export the list for the venue and the caterer.</p>
+        </li>
+      </ol>
+    </div>
+  </section>
+
+  <!-- ================= MULTI-DAY ================= -->
+  <section id="multi-day" class="band band-alt" aria-labelledby="multiday-title">
+    <div class="shell split">
+      <div>
+        <p class="eyebrow">Multi-day celebrations</p>
+        <h2 id="multiday-title">Five days. One invitation. The right guests for each day.</h2>
+        <p>
+          A wedding is rarely one evening. There is a henna night for the bride's
+          side, a nikah for close family, a ceremony, then four hundred people at
+          the reception. Most invitation tools make you build that as separate
+          events, or give up and invite everybody to everything.
+        </p>
+        <p>
+          Imvite keeps it as one invitation with several days inside it. You
+          decide, per day, who is invited — everyone, or only the households you
+          tag. Each guest sees their own schedule, and replies once for all of it.
+        </p>
+        <p class="note">
+          Guests are never shown what they were not invited to. They simply see
+          their own days.
+        </p>
+      </div>
+
+      <div class="schedule-demo">
+        <h3 class="demo-title">The same invitation, two households</h3>
+        <div class="demo-pair">
+          <div class="demo-card">
+            <p class="demo-who"><bdi>Familja Hoxha</bdi> · 4 seats</p>
+            <ul class="day-list">
+              <li><span class="day-dot in" aria-hidden="true"></span>Henna night <span class="day-when">Thu 16</span></li>
+              <li><span class="day-dot in" aria-hidden="true"></span>Nikah <span class="day-when">Fri 17</span></li>
+              <li><span class="day-dot in" aria-hidden="true"></span>Reception <span class="day-when">Sat 18</span></li>
+            </ul>
+          </div>
+          <div class="demo-card">
+            <p class="demo-who"><bdi>Familja Krasniqi</bdi> · 2 seats</p>
+            <ul class="day-list">
+              <li><span class="day-dot in" aria-hidden="true"></span>Reception <span class="day-when">Sat 18</span></li>
+            </ul>
+            <p class="demo-foot">No empty rows, no explanation needed.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= LANGUAGES ================= -->
+  <section id="languages" class="band" aria-labelledby="lang-title">
+    <div class="shell">
+      <p class="eyebrow">Any language, any script</p>
+      <h2 id="lang-title">Your names, set properly, in your own alphabet.</h2>
+      <p class="section-lede">
+        Two languages on one invitation, side by side or with a switch, for the
+        families who do not share one. Right-to-left is built into the layout,
+        not bolted on: this page uses the same logical layout rules the
+        invitations do, which is why it also reads correctly in Arabic or Hebrew.
+      </p>
+
+      <!--
+        Specimen block. Rendered with the visitor's own system fonts, which cover
+        most of these scripts on most devices.
+        In the product, each script is bound to a self-hosted, subsetted face
+        (Noto Naskh Arabic for Arabic, Noto Nastaliq Urdu for Urdu, Noto Sans
+        Devanagari, and so on) — see docs/architecture/03-i18n-and-typography.md §3.3.
+        A real commissioned display face would be wired in at --font-display.
+      -->
+      <ul class="specimens">
+        <li class="specimen" lang="sq" dir="ltr">
+          <p class="specimen-names"><bdi>Arta &amp; Besnik</bdi></p>
+          <p class="specimen-meta">Albanian · Latin</p>
+        </li>
+        <li class="specimen" lang="ar" dir="rtl">
+          <p class="specimen-names"><bdi>أروى ومروان</bdi></p>
+          <p class="specimen-meta" dir="ltr">Arabic · Arabic script, right to left</p>
+        </li>
+        <li class="specimen specimen-tall" lang="ur" dir="rtl">
+          <p class="specimen-names"><bdi>عائشہ اور بلال</bdi></p>
+          <p class="specimen-meta" dir="ltr">Urdu · Nastaliq needs the room, so it gets it</p>
+        </li>
+        <li class="specimen" lang="hi" dir="ltr">
+          <p class="specimen-names"><bdi>प्रिया और अर्जुन</bdi></p>
+          <p class="specimen-meta">Hindi · Devanagari</p>
+        </li>
+        <li class="specimen" lang="sr" dir="ltr">
+          <p class="specimen-names"><bdi>Ана и Никола</bdi></p>
+          <p class="specimen-meta">Serbian · Cyrillic</p>
+        </li>
+        <li class="specimen" lang="el" dir="ltr">
+          <p class="specimen-names"><bdi>Άννα &amp; Νίκος</bdi></p>
+          <p class="specimen-meta">Greek · tonos intact, never uppercased</p>
+        </li>
+        <li class="specimen" lang="he" dir="rtl">
+          <p class="specimen-names"><bdi>נועה ויונתן</bdi></p>
+          <p class="specimen-meta" dir="ltr">Hebrew · Hebrew script, right to left</p>
+        </li>
+        <li class="specimen" lang="tr" dir="ltr">
+          <p class="specimen-names"><bdi>Zeynep &amp; Emre</bdi></p>
+          <p class="specimen-meta">Turkish · dotted and dotless i, handled</p>
+        </li>
+      </ul>
+      <p class="micro">
+        Names above are examples we wrote, not customers. They are drawn here with
+        the fonts already on your device; the invitations themselves ship a proper
+        face for each script.
+      </p>
+
+      <ul class="tick-list">
+        <li>Two languages per invitation, stacked or behind a switch.</li>
+        <li>Dates in the calendar your family uses, including a Hijri line you can correct by hand.</li>
+        <li>Guest names sorted the way your language sorts them, not the way a database does.</li>
+        <li>Mixed scripts in one line — a Latin hotel name inside an Arabic sentence — set the right way round.</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ================= SHARING ================= -->
+  <section id="sharing" class="band band-alt" aria-labelledby="share-title">
+    <div class="shell split split-reverse">
+      <div>
+        <p class="eyebrow">Built for how invitations actually travel</p>
+        <h2 id="share-title">It will end up in a family group chat. That is the plan.</h2>
+        <p>
+          Invitations do not travel by email. They go into a chat, get forwarded
+          by a proud uncle, and land in a group of forty people. Imvite is
+          designed around that rather than against it.
+        </p>
+        <ul class="tick-list">
+          <li><strong>The preview carries your names.</strong> Paste the link and the
+          card shows your names, your date and your theme — not a grey logo.</li>
+          <li><strong>A QR code for the printed cards.</strong> Print-ready, with the
+          quiet zone and the size a church-door scan actually needs.</li>
+          <li><strong>A personal link per household,</strong> with their greeting and
+          their days already filled in.</li>
+          <li><strong>Forwarding does not break it.</strong> Someone who is not in that
+          household gets a quiet "Not you?" and can reply as themselves. You see
+          the new name and accept it in one tap.</li>
+        </ul>
+      </div>
+
+      <div class="chat-demo" aria-hidden="true">
+        <!-- Authored SVG-free mock of a chat message with a link preview card. No third-party brand marks. -->
+        <div class="chat-bubble">
+          <p class="chat-text">Të dashur, ju ftojmë në dasmën tonë. Ju lutemi konfirmoni këtu:</p>
+          <div class="preview-card">
+            <div class="preview-image">
+              <!-- Placeholder for the generated per-invitation OG image. -->
+              <svg viewBox="0 0 200 100" width="100%" height="100%" preserveAspectRatio="xMidYMid slice" aria-hidden="true" focusable="false">
+                <rect width="200" height="100" fill="none"/>
+                <path d="M20 62c14-18 28-18 42 0s28 18 42 0 28-18 42 0 20 10 34 4" fill="none" stroke="currentColor" stroke-width="1.1" opacity=".5"/>
+                <path d="M100 22c4 5 6.5 8 6.5 11a6.5 6.5 0 0 1-13 0c0-3 2.5-6 6.5-11Z" fill="currentColor" opacity=".55"/>
+                <text x="100" y="52" text-anchor="middle" font-size="13" fill="currentColor" font-family="Georgia, serif">Arta &amp; Besnik</text>
+                <text x="100" y="70" text-anchor="middle" font-size="7" fill="currentColor" opacity=".75" letter-spacing="1.2">18 KORRIK 2026</text>
+              </svg>
+            </div>
+            <p class="preview-title">Arta &amp; Besnik — 18 July 2026</p>
+            <p class="preview-url">imvite.me</p>
+          </div>
+          <p class="chat-link">imvite.me/i/arta-besnik</p>
+          <span class="chat-time">21:14</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= OCCASIONS ================= -->
+  <section id="occasions" class="band" aria-labelledby="occ-title">
+    <div class="shell">
+      <p class="eyebrow">Beyond weddings</p>
+      <h2 id="occ-title">The same care, for every gathering that matters.</h2>
+      <p class="section-lede">
+        A wedding is the hardest case, so everything else is easy. The same
+        themes, guest lists and RSVP work for any day your family circles.
+      </p>
+      <ul class="chips">
+        <li>Engagement</li>
+        <li>Nikah</li>
+        <li>Henna &amp; mehndi night</li>
+        <li>Save the date</li>
+        <li>Baptism</li>
+        <li>Quinceañera</li>
+        <li>Bar &amp; bat mitzvah</li>
+        <li>Graduation</li>
+        <li>Milestone birthday</li>
+        <li>Thank-you card</li>
+      </ul>
+      <p class="micro">
+        Weddings, engagements and nikah come first at launch. The rest follow
+        close behind — same machinery, different wording and defaults.
+      </p>
+    </div>
+  </section>
+
+  <!-- ================= PRICING ================= -->
+  <section id="pricing" class="band band-alt" aria-labelledby="price-title">
+    <div class="shell">
+      <p class="eyebrow">Pay once</p>
+      <h2 id="price-title">One invitation, one payment. No subscription.</h2>
+      <p class="section-lede">
+        Build the whole thing for free and look at it properly. You only pay when
+        you are ready to publish and send it.
+      </p>
+
+      <div class="plans">
+        <article class="plan">
+          <h3>Basic</h3>
+          <p class="price"><span class="amount">€29</span> <span class="once">once</span></p>
+          <ul class="tick-list">
+            <li>One invitation, one date</li>
+            <li>One language</li>
+            <li>Public link and a QR code</li>
+            <li>RSVP with party size and a message</li>
+            <li>Up to 150 guest entries, paste or CSV</li>
+            <li>Dashboard, email alerts, CSV export</li>
+            <li>Online until 60 days after the day</li>
+          </ul>
+        </article>
+
+        <article class="plan plan-featured">
+          <h3>Plus</h3>
+          <p class="price"><span class="amount">€59</span> <span class="once">once</span></p>
+          <p class="plan-note">Everything in Basic, and the parts most families need.</p>
+          <ul class="tick-list">
+            <li>Multi-day events with per-guest scoping</li>
+            <li>A second language, side by side or toggled</li>
+            <li>Personal links per household, plus-ones</li>
+            <li>Premium themes, gallery, music, countdown</li>
+            <li>Custom RSVP questions and meal preference</li>
+            <li>Unlimited guests</li>
+            <li>Online until 12 months after the day</li>
+          </ul>
+        </article>
+
+        <article class="plan plan-addons">
+          <h3>Add-ons</h3>
+          <p class="plan-note">Take any of these with either tier.</p>
+          <ul class="addon-list">
+            <li><span>Remove the Imvite footer</span> <span class="addon-price">€19</span></li>
+            <li><span>Vanity link, imvite.me/arta-besnik</span> <span class="addon-price">€9</span></li>
+            <li><span>Print pack, press-ready PDF with QR</span> <span class="addon-price">€15</span></li>
+            <li><span>Ten-year archive</span> <span class="addon-price">€19</span></li>
+            <li><span>A second invitation for the same day</span> <span class="addon-price">€19</span></li>
+            <li><span>Designer touch-up, one revision round</span> <span class="addon-price">€49</span></li>
+          </ul>
+        </article>
+      </div>
+
+      <p class="micro">
+        Indicative pre-launch pricing, shown in euro and inclusive of EU VAT.
+        Prices are adjusted by region, set by the billing country of the card you
+        pay with, and shown to you before anything is charged. Final prices are
+        confirmed at launch.
+      </p>
+      <p class="micro">
+        Planning weddings for a living? A monthly planner tier with invitation
+        credits and a client roster is coming. <a href="#signup">Tell us on the list</a>
+        and we will bring you in early.
+      </p>
+    </div>
+  </section>
+
+  <!-- ================= FAQ ================= -->
+  <section id="faq" class="band" aria-labelledby="faq-title">
+    <div class="shell narrow">
+      <p class="eyebrow">Questions</p>
+      <h2 id="faq-title">The things people ask first.</h2>
+
+      <!-- Native disclosure widgets: they work with JavaScript disabled. -->
+      <div class="faq">
+        <details>
+          <summary>What happens after I pay?</summary>
+          <div class="faq-body">
+            <p>Your invitation is published straight away. You get the public link,
+            the QR code, the link preview with your names on it, and a share screen
+            with a message already written in your language. Your dashboard opens
+            at the same moment, so you can start sending and watching replies the
+            same evening.</p>
+          </div>
+        </details>
+
+        <details>
+          <summary>How do guests RSVP?</summary>
+          <div class="faq-body">
+            <p>They tap the link and answer two questions: are you coming, and how
+            many of you. If you are having several days, they tick the ones they
+            are invited to. Most people finish in well under a minute. They can
+            leave a message, add the day to their calendar, and get directions.</p>
+            <p>It works on old phones and bad connections. If the page cannot run
+            JavaScript, the form still submits. On a wedding day the RSVP must never
+            fail.</p>
+          </div>
+        </details>
+
+        <details>
+          <summary>Do guests need an app or an account?</summary>
+          <div class="faq-body">
+            <p>No. No app, no sign-up, no email address required to reply. The
+            invitation page sets no tracking cookies and loads nothing from anyone
+            else's servers. It is a web page that opens fast, which is the whole
+            point.</p>
+          </div>
+        </details>
+
+        <details>
+          <summary>Can I edit it after I have shared it?</summary>
+          <div class="faq-body">
+            <p>Yes. Change the venue, fix a spelling, move a time, add a day — the
+            link stays the same and everyone sees the current version next time they
+            open it. RSVPs already collected are kept. If you change the date or the
+            place, you can message everyone who has replied.</p>
+          </div>
+        </details>
+
+        <details>
+          <summary>Which languages can I use?</summary>
+          <div class="faq-body">
+            <p>Any language you can type. Your own words are your own — we never
+            translate them. Two languages can sit on one invitation, side by side
+            or behind a switch, which is what a mixed-family wedding usually needs.
+            Right-to-left scripts are laid out properly rather than mirrored badly.</p>
+            <p>The buttons and emails around your words ship in Albanian, German,
+            English, Turkish and Arabic at launch, with more as we open each market.</p>
+          </div>
+        </details>
+
+        <details>
+          <summary>How long does my link stay online?</summary>
+          <div class="faq-body">
+            <p>Basic keeps it live until 60 days after the event. Plus keeps it for
+            12 months. If you want to keep it for good, the ten-year archive add-on
+            is €19 and can be bought at any time. We will never take a published
+            invitation offline before its date, whatever else happens.</p>
+          </div>
+        </details>
+
+        <details>
+          <summary>What happens to my guest list?</summary>
+          <div class="faq-body">
+            <p>It is yours. Export it to CSV or Excel whenever you like, and delete
+            it whenever you like. We do not sell it, market to it, or use it to
+            train anything. Meal preferences and notes are purged on a schedule
+            after the event, and you get the export first.</p>
+          </div>
+        </details>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= CLOSING SIGN-UP ================= -->
+  <section id="signup" class="band band-close" aria-labelledby="signup-title">
+    <div class="shell narrow center">
+      <svg class="ornament ornament-close no-flip" viewBox="0 0 180 28" width="180" height="28" aria-hidden="true" focusable="false">
+        <path d="M4 14h58M118 14h58" stroke="currentColor" stroke-width="1" fill="none" stroke-linecap="round"/>
+        <path d="M90 4c6 6 9.5 8.5 9.5 10.5S96 20 90 26c-6-6-9.5-9.5-9.5-11.5S84 10 90 4Z" fill="none" stroke="currentColor" stroke-width="1"/>
+        <circle cx="70" cy="14" r="2" fill="currentColor"/>
+        <circle cx="110" cy="14" r="2" fill="currentColor"/>
+      </svg>
+      <h2 id="signup-title">Be among the first.</h2>
+      <p class="section-lede">
+        Imvite is not open yet. We are building it now, with a small group of
+        couples and planners who tell us what a real wedding needs. Leave your
+        email and you will hear from us before anyone else — and you can shape
+        what ships.
+      </p>
+
+      <form class="signup signup-wide" action="/subscribe" method="post" data-signup>
+        <!-- Same placeholder endpoint as the hero form. See README.md. -->
+        <input type="hidden" name="source" value="footer">
+        <p class="hp" aria-hidden="true"><label>Leave this empty<input type="text" name="company" tabindex="-1" autocomplete="off"></label></p>
+
+        <div class="signup-row">
+          <div class="field">
+            <label for="email-close">Email address</label>
+            <input id="email-close" name="email" type="email" autocomplete="email" required
+                   placeholder="you@example.com" spellcheck="false">
+          </div>
+          <button class="btn btn-primary" type="submit">
+            <span>Join the list</span>
+            <svg class="icon" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" focusable="false">
+              <path d="M4 12h15M13 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </button>
+        </div>
+
+        <p class="consent">
+          <label>
+            <input type="checkbox" name="consent" value="yes" required>
+            <span>Email me once Imvite opens, and occasionally about progress. One
+            click unsubscribes. Nothing else, ever. <a href="#privacy">How we handle your
+            email</a>.</span>
+          </label>
+        </p>
+        <p class="form-status" role="status" data-status></p>
+      </form>
+    </div>
+  </section>
+
+</main>
+
+<footer class="site-footer">
+  <div class="shell footer-row">
+    <p class="footer-brand">
+      <span class="brand-word">Imvite</span>
+      <span class="footer-tag">Digital invitations for weddings and life events.</span>
+    </p>
+    <nav aria-label="Footer">
+      <ul class="footer-links">
+        <!-- TODO: replace these placeholders with the real pages before launch. -->
+        <li><a id="privacy" href="#privacy">Privacy</a></li>
+        <li><a href="#terms">Terms</a></li>
+        <li><a href="#contact">Contact</a></li>
+      </ul>
+    </nav>
+    <p class="footer-note">
+      Not open yet. No cookies, no trackers, and nothing on this page is loaded
+      from anyone else.
+    </p>
+  </div>
+</footer>
+
+<script src="app.js" defer></script>
+</body>
+</html>
