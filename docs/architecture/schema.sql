@@ -13,16 +13,10 @@
 --     native enum is a schema change and they are painful to reorder.
 --   * jsonb for validated structured content only, never as a dumping ground.
 --     Every jsonb column below has a JSON Schema enforced at the app boundary.
---   * "locale map" means {"sq": "...", "de": "..."} — see 01-data-model.md §1.4
 -- =============================================================================
 
 CREATE EXTENSION IF NOT EXISTS citext;
 CREATE EXTENSION IF NOT EXISTS pg_trgm;
-
--- ICU collation for correctly sorting Albanian guest names (Ç, Ë).
--- Create per-locale collations as markets open; sort in PHP with Collator
--- where a query-level collation is impractical.
--- CREATE COLLATION sq_icu (provider = icu, locale = 'sq', deterministic = false);
 
 
 -- =============================================================================
@@ -34,7 +28,6 @@ CREATE TABLE users (
     email           citext NOT NULL UNIQUE,
     password_hash   text,                        -- NULL => magic-link only
     display_name    text,
-    ui_locale       text NOT NULL DEFAULT 'en',  -- BCP-47
     country_code    char(2),                     -- last known BILLING country
     marketing_opt_in boolean NOT NULL DEFAULT false,
     created_at      timestamptz NOT NULL DEFAULT now(),
@@ -59,10 +52,10 @@ CREATE TABLE invitation_collaborators (
 -- =============================================================================
 
 CREATE TABLE event_kinds (
-    code                text PRIMARY KEY,     -- 'wedding','nikah','quinceanera',...
+    code                text PRIMARY KEY,     -- 'wedding','engagement','baptism',...
     family              text NOT NULL,        -- 'wedding','religious','coming_of_age','milestone'
     default_sections    jsonb NOT NULL,       -- ordered [{type, data}] starter set
-    default_sub_events  jsonb NOT NULL,       -- e.g. ['nikah','walima']
+    default_sub_events  jsonb NOT NULL,       -- e.g. ['ceremony','reception']
     sort_order          int  NOT NULL DEFAULT 0,
     is_active           boolean NOT NULL DEFAULT true
 );
@@ -104,7 +97,6 @@ CREATE TABLE themes (
     current_version     int  NOT NULL,
     tier                text NOT NULL CHECK (tier IN ('standard','premium')),
     supported_sections  text[] NOT NULL,
-    supported_scripts   text[] NOT NULL,      -- ISO 15924: latn, arab, cyrl, deva, grek, hebr
     capabilities        jsonb NOT NULL,
     preview_assets      jsonb NOT NULL DEFAULT '{}',
     sort_order          int NOT NULL DEFAULT 0,
@@ -138,19 +130,8 @@ CREATE TABLE invitations (
     theme_version       int  NOT NULL,            -- PINNED at publish; never auto-advanced
     palette_code        text,
 
-    primary_locale      text NOT NULL,
-    secondary_locale    text,                     -- max two; product decision, not a limit
-    locale_display      text NOT NULL DEFAULT 'toggle'
-                        CHECK (locale_display IN ('toggle','stacked','split')),
-    text_direction      text NOT NULL DEFAULT 'auto'
-                        CHECK (text_direction IN ('auto','ltr','rtl')),
-    numeral_system      text NOT NULL DEFAULT 'latn'
-                        CHECK (numeral_system IN ('latn','arab','deva')),
 
     timezone            text NOT NULL,            -- IANA, e.g. 'Europe/Belgrade'
-    calendar_display    text NOT NULL DEFAULT 'gregorian'
-                        CHECK (calendar_display IN ('gregorian','hijri','both','hebrew')),
-    hijri_override      text,                     -- host-typed; computed value is only a suggestion
 
     rsvp_mode           text NOT NULL DEFAULT 'open'
                         CHECK (rsvp_mode IN ('open','invite_only','closed')),
@@ -196,7 +177,7 @@ CREATE TABLE invitation_sections (
     type            text NOT NULL,        -- fixed vocabulary; see 01-data-model.md §1.4
     position        int  NOT NULL,
     is_visible      boolean NOT NULL DEFAULT true,
-    data            jsonb NOT NULL,       -- JSON Schema per type; locale maps for text
+    data            jsonb NOT NULL,       -- JSON Schema per section type
     created_at      timestamptz NOT NULL DEFAULT now(),
     updated_at      timestamptz NOT NULL DEFAULT now()
 );
@@ -205,27 +186,27 @@ CREATE INDEX invitation_sections_order_idx ON invitation_sections (invitation_id
 CREATE TABLE venues (
     id                  uuid PRIMARY KEY,
     invitation_id       uuid NOT NULL REFERENCES invitations(id) ON DELETE CASCADE,
-    name                jsonb NOT NULL,   -- locale map
-    address             jsonb NOT NULL,   -- locale map, FREE TEXT: address formats differ wildly
+    name                text NOT NULL,
+    address             text NOT NULL,    -- free text: address formats vary too much to normalise
     lat                 numeric(9,6),
     lng                 numeric(9,6),
     map_url             text,             -- host-pasted Google/Apple Maps link
-    directions_note     jsonb,
+    directions_note     text,
     position            int NOT NULL DEFAULT 0
 );
 
 CREATE TABLE invitation_events (          -- the sub-events / multi-day schedule
     id                  uuid PRIMARY KEY,
     invitation_id       uuid NOT NULL REFERENCES invitations(id) ON DELETE CASCADE,
-    code                text NOT NULL,    -- 'nikah','mehndi','baraat','reception',...
-    title               jsonb,            -- locale map; overrides the catalog label
-    description         jsonb,
+    code                text NOT NULL,    -- 'ceremony','reception','rehearsal_dinner',...
+    title               text,             -- overrides the catalog label
+    description         text,
     starts_at           timestamptz NOT NULL,
     ends_at             timestamptz,
     timezone            text NOT NULL,    -- MAY differ from the invitation's
     is_time_tbc         boolean NOT NULL DEFAULT false,
     venue_id            uuid REFERENCES venues(id) ON DELETE SET NULL,
-    dress_code          jsonb,
+    dress_code          text,
     position            int NOT NULL DEFAULT 0,
     default_invited     boolean NOT NULL DEFAULT true,   -- overrides store exceptions only
     requires_rsvp       boolean NOT NULL DEFAULT true,
@@ -261,8 +242,7 @@ CREATE TABLE guest_groups (
     id                  uuid PRIMARY KEY,
     invitation_id       uuid NOT NULL REFERENCES invitations(id) ON DELETE CASCADE,
     label               text NOT NULL,        -- internal: "Familja Hoxha"
-    greeting            jsonb,                -- locale map: what the guest sees
-    locale              text,                 -- which of the two locales to serve
+    greeting            text,                 -- what the guest sees
     token_hash          bytea NOT NULL,       -- sha256(token); a dump must not yield live links
     token_hint          char(4) NOT NULL,     -- last 4 chars, so the host can match a link to a row
     seats_allocated     int NOT NULL DEFAULT 1,

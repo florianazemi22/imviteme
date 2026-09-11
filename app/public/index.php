@@ -26,22 +26,19 @@ function check(callable $probe): array
 $checks = [
     'PHP' => check(static fn (): string => PHP_VERSION),
 
-    'intl / ICU' => check(static function (): string {
+    'intl' => check(static function (): string {
         if (!extension_loaded('intl')) {
             throw new RuntimeException('intl extension not loaded');
         }
-        // The formatting Imvite depends on, exercised rather than assumed.
-        $fmt = new IntlDateFormatter('sq_AL', IntlDateFormatter::FULL, IntlDateFormatter::NONE, 'Europe/Belgrade');
-        $sq = $fmt->format(new DateTimeImmutable('2026-07-18'));
-        $hijri = (new IntlDateFormatter(
-            'ar_SA@calendar=islamic-umalqura',
-            IntlDateFormatter::LONG,
-            IntlDateFormatter::NONE,
-            'Asia/Riyadh',
-            IntlDateFormatter::TRADITIONAL
-        ))->format(new DateTimeImmutable('2026-07-18'));
+        // Date formatting and timezone handling, exercised rather than assumed.
+        $formatted = (new IntlDateFormatter(
+            'en_GB',
+            IntlDateFormatter::FULL,
+            IntlDateFormatter::SHORT,
+            'Europe/London'
+        ))->format(new DateTimeImmutable('2026-07-18 15:00:00', new DateTimeZone('UTC')));
 
-        return sprintf('ICU %s · sq: %s · hijri: %s', INTL_ICU_VERSION, $sq, $hijri);
+        return sprintf('ICU %s · %s', INTL_ICU_VERSION, $formatted);
     }),
 
     'PostgreSQL' => check(static function (): string {
@@ -57,9 +54,8 @@ $checks = [
         ]);
         $version = $pdo->query('SHOW server_version')->fetchColumn();
         $ext = $pdo->query("SELECT string_agg(extname, ', ' ORDER BY extname) FROM pg_extension WHERE extname IN ('citext','pg_trgm')")->fetchColumn();
-        $coll = $pdo->query("SELECT count(*) FROM pg_collation WHERE collname LIKE '%\\_icu'")->fetchColumn();
 
-        return sprintf('server %s · extensions: %s · %d ICU collations', $version, $ext ?: 'none', $coll);
+        return sprintf('server %s · extensions: %s', $version, $ext ?: 'none');
     }),
 
     'Redis' => check(static function (): string {

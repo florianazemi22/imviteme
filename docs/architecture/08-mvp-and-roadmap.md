@@ -20,7 +20,7 @@ Build:
 - Public page + open-link RSVP + a basic dashboard.
 
 Sell:
-- Take orders by hand from your own network in Kosovo/Albania/the DACH diaspora.
+- Take orders by hand from your own network.
   Bank transfer or cash. You create the invitation for them from a form or a
   WhatsApp conversation. `orders.provider = 'manual'` — the entitlement model
   already handles it identically to a real checkout.
@@ -47,10 +47,9 @@ things, and it's much cheaper to be surprised now.
 | Area | Scope |
 |---|---|
 | **Auth** | Magic link. No social login, no passwords. |
-| **Event kinds** | wedding, engagement, nikah, birthday, baptism, save-the-date. Same machinery, different defaults and copy. |
-| **Themes** | **3 themes**, each passing the fixture matrix in Latin + Arabic + Cyrillic. Three excellent themes beat ten mediocre ones. |
+| **Event kinds** | wedding, engagement, civil ceremony, birthday, christening, save-the-date. Same machinery, different defaults and copy. |
+| **Themes** | **3 themes**, each passing the fixture matrix. Three excellent themes beat ten mediocre ones. |
 | **Content** | hero, quote, countdown, story, schedule, venue, gallery, rsvp, dress_code, contacts, faq |
-| **Languages** | UI in sq/de/en/tr/ar. **Two locales per invitation**, toggle mode. Full RTL. |
 | **Multi-day** | Sub-events with per-guest scoping. This is your differentiator; don't cut it. |
 | **Guests** | Groups, seats, plus-ones, paste + CSV import with encoding handling, tags |
 | **Links** | Open link + personal tokens + "Not you?" + review queue |
@@ -58,7 +57,7 @@ things, and it's much cheaper to be surprised now.
 | **Dashboard** | Counts by sub-event, guest table, activity feed, CSV/XLSX export |
 | **Share** | Share screen, WhatsApp/Viber/Telegram/copy/QR, per-guest `wa.me` with `sent_at` |
 | **Previews** | OG images, all sizes, the preview-check tool |
-| **Payments** | One MoR, 3 bands, Basic + Plus + two add-ons (remove branding, vanity slug). PayPal if the MoR doesn't include it. |
+| **Payments** | One MoR, one price list, Basic + Plus + two add-ons (remove branding, vanity slug). PayPal if the MoR doesn't include it. |
 | **Email** | Host notification on RSVP (digest, not per-response, or they'll mute you), guest confirmation, `.ics` |
 | **Legal/ops** | ToS, privacy policy, DPA, cookie-free public pages, guest-data retention job, PITR backups **with a tested restore** |
 
@@ -74,12 +73,11 @@ accident:
 | **Guest photo upload album** | Storage, moderation, and an abuse surface (someone will upload something awful to a wedding page). Phase 2, paid. |
 | **WhatsApp Business API** | Template pre-approval, per-message fees, a Meta Business verification process. Manual `wa.me` links do the job. |
 | **Custom domains** | DNS support tickets forever, for a €29 product. Phase 3. |
-| **MP4/video export** | Genuinely high-leverage for MENA/South Asia — and genuinely a month of work. Phase 2, and only if those markets show demand. |
+| **MP4/video export** | A month of work for a format nobody has asked you for yet. Revisit only if customers ask. |
 | **Native apps** | No reason. It's a link. |
 | **Theme marketplace / third-party designers** | Needs a sandbox, review, payouts. Phase 4. |
 | **AI wording assistant** | Two days to build, nobody buys a product for it. Later, as a delight feature. |
 | **Multi-user collaboration** | The join table exists ([01](01-data-model.md) §1.2); the UI doesn't. Hosts share a login. Fine. |
-| **CJK support** | Not in your stated markets and it's 10MB of fonts. |
 | **Guestbook, livestream pages, hotel blocks, gift lists, wedding websites** | This is the scope-creep road to competing with Squarespace and losing. |
 | **Analytics beyond "how many opened the link"** | Vanity. |
 
@@ -94,7 +92,7 @@ in the MVP where they delay revenue.
 
 ## 8.3 Phase 2 — depth in the won market (months 4–8)
 
-Only after the DACH-Albanian funnel is producing steady sales.
+Only after the funnel is producing steady sales.
 
 1. **Themes to 10–12.** Now cheap, because the matrix and manifest exist. This is
    the highest-ROI work in Phase 2 — theme variety is what converts browsers.
@@ -108,22 +106,23 @@ Only after the DACH-Albanian funnel is producing steady sales.
 5. **Automated email reminders** to non-responders.
 6. **Planner/agency tier** ([04](04-pricing-and-tiering.md)) — the recurring
    revenue experiment. Probe it with five real planners before building much.
-7. **MP4 export** — *if* MENA/South Asia demand shows up. The declarative motion
-   vocabulary ([02](02-theme-architecture.md) §2.5) is what makes this feasible.
+7. **Video export** — only if customers ask for it. The declarative motion
+   vocabulary ([02](02-theme-architecture.md) §2.5) is what would make it
+   feasible.
 
 ---
 
-## 8.4 Phase 3 — market expansion (months 8–14)
+## 8.4 Phase 3 — expansion (months 8–14)
 
-Now, and only now, open a second funnel. Pick **one**: Turkey, or the
-Turkish/Arab diaspora in DACH (which leverages the funnel you already have).
+Now, and only now, widen. In roughly this order:
 
-- Localised landing pages with real local SEO, not machine-translated.
-- Local payment rails for that market only ([05](05-payments.md) §5.5).
-- Themes designed for that market's aesthetic — not recolours of your Balkan
-  themes. This is the part people underestimate.
-- Support coverage in that language (a part-time contractor, not you at 1am).
-- Custom domains, white-label for planners.
+- Custom domains and white-label for planners.
+- Themes for adjacent occasions rather than adjacent countries — corporate
+  events, milestone parties, christenings — which reuse everything you have.
+- Only then, if the data says so, a second market. Doing that properly means a
+  native landing page, local payment rails, market-specific themes and support
+  coverage in that language. It is a much larger project than it looks, and
+  nothing in the architecture above prevents you from starting it later.
 
 ---
 
@@ -141,8 +140,7 @@ A checklist worth holding yourself to before charging strangers:
 
 - [ ] A 500-guest invitation with 5 sub-events renders in <2.5s LCP on throttled
       Slow 4G on a real mid-range Android.
-- [ ] The fixture matrix passes on all 3 themes across all launch scripts.
-- [ ] An Arabic invitation with a Latin venue name renders with correct bidi.
+- [ ] The fixture matrix passes on all 3 themes.
 - [ ] The WhatsApp preview shows the couple's names on iOS and Android.
 - [ ] The RSVP form completes with JavaScript disabled.
 - [ ] A restore from backup has been performed into a scratch database.

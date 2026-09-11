@@ -24,9 +24,10 @@ written yes/no. Three emails, one afternoon. **Do this before spending €2,000 
 company formation** — if one says yes, Path A in [05](05-payments.md) may be
 unnecessary.
 
-Also verify: does the MoR you pick present the **billing country** of the payment
-instrument in its webhooks? Your entire regional pricing scheme
-([04](04-pricing-and-tiering.md) §4.4) depends on that field existing.
+Also worth confirming: the MoR reports the **billing country** on each order.
+You do not price on it today ([04](04-pricing-and-tiering.md) §4.4), but
+recording it from day one is what tells you later whether a second market is
+worth opening.
 
 ### 2. Estonian OÜ tax exposure for a Kosovo-resident director
 **Confidence: Low.**
@@ -77,17 +78,6 @@ rasterisation (which your OG service does).
 **How to verify:** read the actual EULA for every asset and font before it enters
 a theme. Keep `themes/<code>/LICENSE.md` recording provenance from theme #1.
 
-### 6. Satori / `@vercel/og` complex-script support
-**Confidence: Medium that it's insufficient.**
-
-If Satori now handles Arabic shaping, Devanagari conjuncts and bidi correctly, it
-would be lighter and faster than Playwright + Chromium.
-
-**How to verify:** an afternoon spike. Render "الأربعاء ٢٥ يوليو" and
-"अर्जुन और प्रिया" and a Nastaliq Urdu string in both Satori and Chromium, and
-compare against a reference. If Satori is correct, use it; if not, Chromium.
-Chromium is the safe default and also gives you PDF generation for free.
-
 ### 7. WhatsApp OG image size threshold and cache duration
 **Confidence: Medium.**
 
@@ -127,38 +117,19 @@ support against your analytics before relying on scroll-driven CSS animations
 rather than the IntersectionObserver fallback. The fallback exists either way, so
 this only affects how much JS ships.
 
-### 11. Contact Picker API availability
-Android Chrome yes, iOS Safari no (as far as I know). Verify current status
-before promising "import from your phone contacts" in marketing.
-
 ### 12. `sms:` URL scheme separator differences
 iOS historically wants `sms:&body=`, Android `sms:?body=`. `sms:?&body=` is the
 commonly cited both-platforms form. Test on real devices.
-
-### 13. Viber's share URL scheme
-`viber://forward?text=` is what I'd try. Viber matters in the Balkans and Greece;
-verify it still works on current app versions.
 
 ### 14. Current Kosovo bank e-commerce acquiring terms
 Fees, rolling reserves, API quality and 3DS behaviour at ProCredit / Raiffeisen /
 TEB / BKT. Worth a call each if you want a domestic card rail in Phase 2.
 
-### 15. eftesa.com's actual feature set and pricing
-I've reasoned from your description. Before finalising tiering, go buy one of
-their invitations and go through the whole flow as a customer. €25 and an
-afternoon, and it will sharpen [04](04-pricing-and-tiering.md) more than
-anything I can tell you.
-
-### 16. Whether the MENA / South Asia market actually wants a link
-My claim that the incumbent format there is an animated MP4 from a freelancer is
-a strong assertion based on how those markets have behaved, not on data you can
-check in a spreadsheet.
-
-**How to verify cheaply:** search Instagram and TikTok for
-`دعوة زفاف الكترونية`, `shaadi invitation video`, `wedding invite video` and see
-what's actually being sold, at what price, in what format. An hour of scrolling
-will tell you more than a market report. If the answer is "video", that changes
-your Phase 2 priority ordering and possibly your market ordering.
+### 15. What the competitors' funnels actually feel like
+Before finalising tiering, go buy an invitation from two competitors and go
+through the whole flow as a customer, including the RSVP as a guest. An
+afternoon and about €50, and it will sharpen
+[04](04-pricing-and-tiering.md) more than anything I can tell you.
 
 ---
 
@@ -169,11 +140,7 @@ For completeness, so you know where to *not* spend time:
 - Stripe does not support Kosovo.
 - EU B2C digital-services VAT is due from the first sale for a non-established
   supplier; an MoR is the right answer for a solo founder.
-- CSS logical properties + `dir` on `<html>` + `<bdi>` on user content is the
-  correct RTL approach, and stylelint can enforce it.
-- Splitting text into per-character spans breaks Arabic shaping and Devanagari
-  conjuncts.
-- PHP GD/Imagick cannot shape complex scripts; headless Chromium can.
-- `text-transform: uppercase` is unsafe for Turkish, Greek and non-cased scripts.
+- Headless Chromium gives far better typography than any PHP image or PDF
+  library, and renders the theme's own CSS.
 - Crawlers don't execute JavaScript, so OG tags must be server-rendered.
 - Pinning theme versions per published invitation is the right call.

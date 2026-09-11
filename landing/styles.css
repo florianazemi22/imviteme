@@ -2,12 +2,9 @@
    Imvite — pre-launch landing page
    --------------------------------------------------------------------------
    Rules this stylesheet holds itself to, because the product claims them:
-     * CSS logical properties only: margin-inline, padding-block,
-       inset-inline-start, border-inline-end, text-align: start. The physical
-       equivalents appear nowhere in this file — grep it and see.
-       The product enforces the same rule with stylelint-use-logical in CI.
-     * Direction comes from dir="rtl" on <html>. Icons mirror by default;
-       anything that must not mirror carries .no-flip.
+     * CSS logical properties throughout: margin-inline, padding-block,
+       inset-inline-start, text-align: start. Modern, terser than the physical
+       equivalents, and they cost nothing.
      * Fluid type with clamp(). No fixed heading sizes.
      * Light and dark both explicitly painted.
      * Every animation is switched off under prefers-reduced-motion.
@@ -126,9 +123,6 @@ section[id], [id] { scroll-margin-block-start: 5rem; }
 
 ul, ol { padding-inline-start: 0; margin-block: 0; list-style: none; }
 
-/* icons mirror with direction; .no-flip opts out (logos, QR, ornaments) */
-[dir="rtl"] .icon { transform: scaleX(-1); }
-[dir="rtl"] .icon.no-flip { transform: none; }
 
 .skip-link {
   position: absolute;
@@ -519,36 +513,6 @@ ul, ol { padding-inline-start: 0; margin-block: 0; list-style: none; }
   margin-block: 0.8rem 0;
   font-size: var(--step--1);
   color: var(--ink-soft);
-}
-
-/* ---------- specimens ---------- */
-.specimens {
-  display: grid;
-  gap: 0.9rem;
-  grid-template-columns: repeat(auto-fit, minmax(13.5rem, 1fr));
-  margin-block: 0 1rem;
-}
-.specimen {
-  background: var(--surface);
-  border: var(--border);
-  border-radius: var(--radius);
-  padding: 1.15rem 1.1rem;
-  text-align: start;
-}
-.specimen-names {
-  font-family: var(--font-display);
-  font-size: var(--step-2);
-  line-height: 1.45;
-  margin-block: 0 0.4rem;
-  overflow-wrap: break-word;
-}
-/* Nastaliq cascades steeply; it needs far more vertical room than Latin.
-   In the product this is a per-script line-height token, not a one-off. */
-.specimen-tall .specimen-names { line-height: 2.1; }
-.specimen-meta {
-  font-size: var(--step--1);
-  color: var(--ink-soft);
-  margin: 0;
 }
 
 /* ---------- tick list ---------- */

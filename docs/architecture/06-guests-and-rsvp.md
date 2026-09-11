@@ -7,11 +7,10 @@ tell their friends.
 
 ## 6.1 The unit is the group, not the person
 
-A Balkan or South Asian wedding invitation is addressed to **"Familja Hoxha"** or
-**"Mr & Mrs Khan and family"**, not to individuals. One link goes to one
-household via one WhatsApp message. Modelling guests as individuals first and
-grouping them second gets this backwards and makes the host's data entry
-miserable.
+A wedding invitation is addressed to **"The Hartley family"** or **"Mr & Mrs
+Blake and family"**, not to individuals. One link goes to one household via one
+message. Modelling guests as individuals first and grouping them second gets
+this backwards and makes the host's data entry miserable.
 
 ```
 guest_groups (1) ──< guests (0..n)
@@ -37,7 +36,7 @@ Two separate concepts; keep them distinct:
 
 The RSVP form enforces `attending_count <= seats_allocated + plus_one_limit`, and
 shows a clear message rather than a validation error when exceeded ("Your
-invitation covers 4 guests. Need more seats? Message Arta directly." + a `wa.me`
+invitation covers 4 guests. Need more seats? Message Anna directly." + a `wa.me`
 link). Never let a guest silently add 12 people to a seated dinner; never make
 them feel policed either.
 
@@ -62,7 +61,7 @@ Keep `token_hint` (last 4 chars) in plaintext so the host's dashboard can show
 
 **Personal links will be forwarded. Plan for it; do not try to prevent it.**
 
-The actual sequence in every real wedding: you send Arta's uncle his personal
+The actual sequence in every real wedding: you send Anna's uncle his personal
 link; he forwards it to the family group of 40 because he's proud of it; six
 people RSVP through his token; three of them are not in his household.
 
@@ -79,7 +78,7 @@ Right responses, in order:
    primary button copies the *open* link. Personal links are surfaced one-per-row
    in the guest list, with copy/WhatsApp buttons — a deliberate 1:1 action.
 2. **"Not you?" affordance.** A personal link shows the greeting with a quiet
-   "Not Familja Hoxha? →" control. Tapping it drops to the open-link RSVP flow,
+   "Not the Hartley family? →" control. Tapping it drops to the open-link RSVP flow,
    creating a new group with `review_status = 'pending_host_review'`. Make it
    visible but not alarming.
 3. **Soft device recognition.** First device to submit through a token sets a
@@ -122,7 +121,7 @@ Editor UX that makes this usable for a 600-guest wedding:
 - The guest list has a column per sub-event with checkboxes, plus bulk selection
   and **tags** (see §6.5) so the host can do "invite everyone tagged
   `family-groom` to the henna night" in two clicks rather than 60.
-- A visible per-event counter ("Mehndi: 42 groups, 138 seats") so the host can
+- A visible per-event counter ("Rehearsal dinner: 42 groups, 138 seats") so the host can
   sanity-check against the venue's capacity.
 
 Guest-facing: the invitation page shows only the sub-events that group is invited
@@ -141,7 +140,7 @@ that will land in the host's inbox.
 Progressive, short, and phone-first. Target: **under 20 seconds for the common
 case.**
 
-**Screen 1** — "Arta & Besnik would be delighted to see you" + [Yes, I'll be
+**Screen 1** — "Anna & Luis would be delighted to see you" + [Yes, I'll be
 there] / [Sadly, I can't]. Two enormous buttons. That's it. A "no" ends here with
 an optional message box.
 
@@ -191,11 +190,10 @@ The host has their guest list somewhere. Meet it where it is.
 
 Import mechanics that matter:
 
-- **Encoding.** A CSV exported from Excel on a Turkish or Albanian Windows machine
-  will be CP1254/CP1250, not UTF-8, and the names will arrive mangled. Detect with
-  `mb_detect_encoding` plus a BOM check, show a preview of the first five rows,
-  and let the user correct the encoding before committing. This one detail will
-  save you a hundred support messages.
+- **Encoding.** A CSV exported from Excel is often CP1252 with a BOM rather than
+  UTF-8, and accented names arrive mangled. Detect with `mb_detect_encoding` plus
+  a BOM check, show a preview of the first five rows, and let the user correct it
+  before committing. This one detail will save you a hundred support messages.
 - **Preview and dry-run always.** Show exactly what will be created before
   writing anything.
 - **Fuzzy duplicate detection** on import using `pg_trgm` similarity on
@@ -222,8 +220,8 @@ This is where the product either spreads or doesn't.
    card with their names and date. Seeing it is the reassurance that makes people
    send it. (See [07](07-link-previews.md).)
 2. **An editable pre-written message** in the invitation's language:
-   > Të dashur, kemi kënaqësinë t'ju ftojmë në dasmën tonë. Ju lutemi konfirmoni
-   > praninë tuaj këtu: https://imvite.me/i/arta-besnik-x7k2
+   > We would love to have you with us. Everything you need is here, and you
+   > can reply in a minute: https://imvite.me/i/anna-luis-x7k2
 3. **Channel buttons**, in this order:
    - **WhatsApp** — `https://wa.me/?text=` (plus `https://wa.me/{e164}?text=` for
      per-guest sending)
@@ -231,8 +229,7 @@ This is where the product either spreads or doesn't.
    - **Instagram** — no text-prefill API exists; copy the link and open the app,
      with a line explaining to paste it into a story/DM
    - **Telegram** — `https://t.me/share/url?url=&text=`
-   - **Viber** — `viber://forward?text=` (still meaningful in the Balkans and
-     Greece; don't skip it)
+   - **Viber** — `viber://forward?text=`
    - **iMessage/SMS** — `sms:&body=` (note: iOS uses `&`, Android historically
      `?`; emit both via UA sniffing or use `sms:?&body=` which works on both)
    - **Email**, **QR download**
@@ -265,13 +262,13 @@ Minimum viable, but genuinely useful:
 
 - **Headline numbers:** invited / confirmed / declined / awaiting, and total
   seats confirmed per sub-event. Seats, not groups — the caterer needs seats.
-- **Guest table:** search, filter by status/tag/sub-event, sort with an ICU
-  collation ([03](03-i18n-and-typography.md) §3.5), inline edit, bulk actions.
+- **Guest table:** search, filter by status/tag/sub-event, sort, inline edit,
+  bulk actions.
 - **Review queue** (§6.2).
 - **Export:** CSV and XLSX, one row per person, with meal preferences — this is
   what the host hands the caterer and the venue. Get the column set right and it's
   a genuine reason to buy.
-- **Activity feed:** "Familja Hoxha confirmed 4 · 2h ago". Hosts check this
+- **Activity feed:** "the Hartley family confirmed 4 · 2h ago". Hosts check this
   compulsively; it's the return-visit hook and it costs you one query.
 - **Reminders:** a one-click "message everyone who hasn't replied" that generates
   a list of `wa.me` links to work through, not an automated blast. Email reminders

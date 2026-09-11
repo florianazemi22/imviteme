@@ -1,6 +1,6 @@
 # 7. Link previews (OG images)
 
-When someone drops `imvite.me/i/arta-besnik-x7k2` into a WhatsApp group, the
+When someone drops `imvite.me/i/anna-luis-x7k2` into a WhatsApp group, the
 card that appears must show the couple's names, the date, and the theme's
 aesthetic. If it shows a generic Imvite logo, the share looks like spam and the
 host stops sharing it. This is a conversion-critical feature, not a nice-to-have.
@@ -11,35 +11,33 @@ host stops sharing it. This is a conversion-critical feature, not a nice-to-have
 
 ### Why not the alternatives
 
-- **PHP image libraries (GD, Imagick, Intervention)** — no complex-script text
-  shaping. They will render Arabic as disconnected, backwards letters and
-  Devanagari without conjuncts. For a product whose whole premise is multi-script
-  correctness, this is disqualifying. Rule it out immediately.
-- **Satori / `@vercel/og`** — elegant, fast, JSX-to-SVG. But it implements its own
-  text layout rather than using HarfBuzz, and its complex-script support
-  (Arabic shaping, Indic reordering, bidi) has historically been incomplete.
-  **Verify before adopting** ([OPEN-QUESTIONS](OPEN-QUESTIONS.md)); my expectation
-  is it won't be good enough for Nastaliq or Devanagari.
+- **PHP image libraries (GD, Imagick, Intervention)** — workable for a flat
+  layout, but you will be hand-computing text metrics, line breaks and kerning
+  for every theme. Any typography beyond centred text in one weight gets painful
+  fast, and the output never quite matches the theme.
+- **Satori / `@vercel/og`** — elegant and fast, JSX to SVG. It implements its own
+  text layout rather than using a browser engine, so it supports a subset of CSS
+  and you will hit the edges of it. Worth a spike if render cost ever matters.
 - **Cloud services (Bannerbear, Placid, ogimage.org)** — fine, fast to integrate,
-  but a per-image cost, a third-party dependency on a hot path, and the same
-  font-coverage questions.
+  but a per-image cost and a third-party dependency on a conversion-critical
+  path.
 
 ### The recommendation
 
 **A small Node service running Playwright + Chromium**, rendering an HTML
 template and screenshotting it.
 
-Chromium gives you HarfBuzz shaping, full bidi, ligatures, `clamp()`, web fonts,
-emoji, and — crucially — **the same rendering engine as the invitation itself**,
-so the OG card can literally reuse the theme's tokens and fonts and look like the
-theme.
+Chromium gives you the full CSS you already wrote — `clamp()`, grid, web fonts,
+ligatures, emoji — and, crucially, **the same rendering engine as the invitation
+itself**, so the OG card reuses the theme's tokens and fonts and actually looks
+like the theme rather than approximating it.
 
 ```
 Symfony ──(publish/content change)──> Messenger queue
             │
             └─> OgImageHandler
                   POST http://og-service:3000/render
-                    { theme, version, script, dir, palette,
+                    { theme, version, palette,
                       headline, subtitle, date_line, image_url, size }
                   <─ PNG/JPEG bytes
                   └─> upload to R2 at og/{invitation_id}/{content_hash}.jpg
@@ -53,10 +51,9 @@ Details:
   `browser.newContext()` per render and recycle the browser every N renders to
   contain memory leaks.
 - **Fonts baked into the container image** — the same subsetted woff2 files the
-  themes use, plus the full Noto set for the scripts you support. A missing font
-  in the OG container produces tofu boxes in the one image every guest sees.
-  Add a smoke test that renders all fixture scripts at deploy time and fails the
-  deploy on a `.notdef` pixel signature.
+  themes use. A font missing from the OG container silently falls back, and the
+  one image every guest sees renders in the wrong face. Add a deploy-time smoke
+  test that renders a fixture and fails if a declared face did not load.
 - **Wait for `document.fonts.ready`** before screenshotting, plus a
   `waitForFunction` on an explicit `window.__ready = true` the template sets. Do
   not screenshot on a timeout; you'll ship images with fallback fonts.
@@ -68,8 +65,8 @@ Details:
   years.
 
 **Bonus:** the same service renders the **print-ready PDF** (invitation card, QR
-pack) via `page.pdf()`, which solves the complex-script PDF problem from
-[03](03-i18n-and-typography.md) §3.5. Build it once, use it twice.
+pack) via `page.pdf()` — far better typography than any PHP PDF library, and it
+reuses the theme CSS you already have. Build it once, use it twice.
 
 ### Sizes to generate
 
@@ -102,7 +99,7 @@ deletes unreferenced keys older than 90 days.
 ### The page itself
 
 Cache the public invitation HTML at Cloudflare, keyed on
-`slug + resolved locale + guest token presence`:
+`slug + guest token presence`:
 
 - **Open link** (`/i/{slug}`): `s-maxage=300, stale-while-revalidate=86400,
   stale-if-error=604800`. Purge by cache tag `inv:{id}` on publish/edit.
@@ -157,7 +154,6 @@ strong reason the public page is not a client-rendered SPA.
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta property="og:image:alt" content="{{ og_title }}">
-<meta property="og:locale" content="{{ og_locale }}">{# e.g. sq_AL #}
 
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="{{ og_title }}">
@@ -174,12 +170,9 @@ Rules:
   silently in several crawlers.
 - **Explicit `og:image:width`/`height`.** WhatsApp renders a large card rather
   than a thumbnail when it can determine dimensions without fetching.
-- **`og:title`**: the names — "Arta & Besnik". Not "Wedding invitation | Imvite".
+- **`og:title`**: the names — "Anna & Luis". Not "Wedding invitation | Imvite".
   The card must look like *their* invitation, not like your product.
-- **`og:description`**: date + city — "25 korrik 2026 · Prishtinë".
-- **Bake the invitation's primary locale.** Crawlers don't send a useful
-  `Accept-Language`, and a personal link's locale can't be used anyway since the
-  crawler has no token.
+- **`og:description`**: date + place — "25 July 2026 · Bath".
 - **`noindex` public invitations by default.** Someone's wedding address and guest
   list should not be in Google. Offer an opt-in "allow search engines" toggle for
   the rare public event (a graduation party, a business launch). This is a

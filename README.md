@@ -4,9 +4,8 @@ Digital invitations for weddings and life events. Pick a theme, add your details
 pay once, share a link and a QR code. Guests RSVP from their phone; the host
 tracks everything in a dashboard.
 
-Built multi-script and multi-culture from the first migration: per-invitation
-languages including RTL, non-Latin typography that doesn't break, multi-day
-celebrations with per-guest sub-event scoping, and regional pricing.
+Multi-day celebrations under one invitation, with different guests invited to
+different sub-events. English, one market, one price.
 
 **Status:** architecture and planning. The Symfony application has not been
 scaffolded yet; the repository holds the architecture docs, a pre-launch
@@ -31,7 +30,6 @@ the ten decisions everything hangs off, and where each topic lives.
 |---|---|
 | [Data model](docs/architecture/01-data-model.md) · [schema.sql](docs/architecture/schema.sql) | Tables, relationships, theme/content/entitlement decoupling |
 | [Theme architecture](docs/architecture/02-theme-architecture.md) | Manifest, section vocabulary, motion, music, the fixture matrix |
-| [i18n & typography](docs/architecture/03-i18n-and-typography.md) | RTL, per-script fonts, bidi, calendars |
 | [Pricing & tiering](docs/architecture/04-pricing-and-tiering.md) | Tiers, add-ons, three regional bands |
 | [Payments](docs/architecture/05-payments.md) | Merchant-of-record, corporate structure, regional rails |
 | [Guests & RSVP](docs/architecture/06-guests-and-rsvp.md) | Per-guest links, import, the forwarded-link problem |

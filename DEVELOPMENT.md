@@ -26,10 +26,9 @@ make smoke
 
 `app/public/index.php` is a placeholder that reports whether each backing
 service is reachable from the PHP container. Open http://localhost:8000 after
-`make up` and you get a table: PHP version, ICU version with a real Albanian
-and Hijri date formatted through it, Postgres version with its extensions and
-ICU collations, Redis, the render service, and SMTP. It returns HTTP 503 if
-anything is down, so it works as a CI check too.
+`make up` and you get a table: PHP version, ICU version with a date formatted
+through it, Postgres version and its extensions, Redis, the render service, and
+SMTP. It returns HTTP 503 if anything is down, so it works as a CI check too.
 
 ### Scaffolding Symfony over it
 
@@ -56,26 +55,16 @@ loaded by the container — it would drift from the migrations within a week.
 
 ## Why these choices
 
-**PHP on Debian, not Alpine.** Imvite depends on ICU for locale-aware date
-formatting, ICU collation of guest names and grapheme segmentation
-(`docs/architecture/03-i18n-and-typography.md`). Debian ships a full ICU; musl
-images have a history of locale edge cases that would surface as subtly wrong
-Albanian or Turkish sorting rather than as a crash. A quietly mis-sorted guest
-list is a much worse bug than a build failure.
+**PHP on Debian, not Alpine.** Date formatting, timezone handling and
+character counting all go through ICU, and Debian ships a complete one. Alpine
+images are smaller but have a history of locale edge cases that surface as
+subtly wrong output rather than as a crash.
 
-**Postgres gets extensions and ICU collations in both databases.**
-`docker/postgres/initdb/01-databases.sh` creates `citext`, `pg_trgm` and six
-ICU collations in the app *and* test databases. Doing this as plain `.sql`
-would only reach the default database, and the test suite would then fail on a
-missing `citext` in a way that looks like a code bug.
-
-**The render service bakes fonts into the image and asserts them at build
-time.** `docker/og/verify-fonts.sh` runs during `docker build` and fails the
-build if any supported script has no face. It checks Nastaliq by *family*, not
-by `fc-list :lang=ur`, because `:lang=ur` is satisfied by Naskh faces — and
-setting Urdu in Naskh reads as cheap to native readers. The failure this
-prevents is silent: Chromium falls back, the OG image renders in the wrong
-face, and nobody notices until a customer shares their invitation.
+**Postgres gets its extensions in both databases.**
+`docker/postgres/initdb/01-databases.sh` creates `citext` and `pg_trgm` in the
+app *and* test databases. Doing this as plain `.sql` would only reach the
+default database, and the test suite would then fail on a missing `citext` in a
+way that looks like a code bug.
 
 **`shm_size: 1gb` on the og service.** Chromium crashes on larger pages with
 Docker's default 64MB `/dev/shm`. The alternative is
@@ -120,5 +109,5 @@ npx playwright install chromium
 PORT=3000 npm start
 ```
 
-Fonts then come from your machine rather than the image, so what you see is
-not what production renders. Check anything script-related in the container.
+Fonts then come from your machine rather than the image, so check anything
+typography-sensitive in the container before trusting it.

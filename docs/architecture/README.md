@@ -1,8 +1,7 @@
 # Imvite — Architecture & Product Plan
 
 Digital invitations for weddings and life events. One-time purchase, shareable
-link + QR, guest RSVP, host dashboard. Built multi-script and multi-culture from
-the first schema migration.
+link + QR, guest RSVP, host dashboard. English-language, single market.
 
 **Stack:** PHP 8.3 / Symfony 7, Vue 3 + TypeScript, PostgreSQL 16, Cloudflare
 (CDN + R2), Hetzner. Solo developer, Kosovo.
@@ -13,9 +12,8 @@ the first schema migration.
 |---|---|---|
 | 1 | [Data model](01-data-model.md) | Tables, relationships, the three-way decoupling of theme / content / entitlements |
 | 2 | [Theme architecture](02-theme-architecture.md) | Manifest format, section vocabulary, motion, music, how a new theme stays design work |
-| 3 | [i18n & typography](03-i18n-and-typography.md) | RTL, per-script font roles, bidi, calendars, the fixture matrix that keeps themes honest |
-| 4 | [Pricing & tiering](04-pricing-and-tiering.md) | Base vs. add-ons, three price bands, arbitrage control |
-| 5 | [Payments](05-payments.md) | What will and won't onboard a Kosovo founder, corporate structure, regional rails |
+| 4 | [Pricing & tiering](04-pricing-and-tiering.md) | What belongs in the base tier vs. paid add-ons |
+| 5 | [Payments](05-payments.md) | What will and won't onboard a Kosovo founder, and the corporate structure that implies |
 | 6 | [Guests & RSVP](06-guests-and-rsvp.md) | Per-guest links, plus-ones, sub-event scoping, bulk import, the forwarded-link problem |
 | 7 | [Link previews](07-link-previews.md) | Per-invitation OG image generation and caching |
 | 8 | [MVP & roadmap](08-mvp-and-roadmap.md) | Smallest sellable version, explicit cuts, phases |
@@ -55,51 +53,35 @@ the first schema migration.
 7. **Per-guest links are a convenience, not access control.** They will be
    forwarded into WhatsApp groups. Design for that instead of fighting it.
 
-8. **Every user-visible string in a theme is `dir="auto"` / `<bdi>`-wrapped and
-   every layout uses CSS logical properties.** RTL is a property of the data, not
-   a stylesheet variant you maintain twice.
+8. **Themes reference font and colour *roles*, never literal values.** A
+   template containing a hex code or a font name is a CI failure. It is what
+   keeps a new theme to tokens plus a hero override.
 
 9. **Merchant-of-record from day one, through a non-Kosovo company.** Stripe
    will not onboard you in Kosovo. This is a 1–3 month lead-time item and it is
    the most urgent non-code task on this list.
 
-10. **Localise the product globally; localise the funnel one market at a time.**
-    Architecture is cheap to make culture-neutral now. Go-to-market is not.
+10. **One market, one language, one currency.** Every "what if someone in
+    another country…" question is deferred until there is revenue to justify
+    answering it.
 
 ---
 
 ## Pushback on the brief
 
-Three things in the framing I think are wrong or under-weighted. Detail in
-[09-risks.md](09-risks.md).
+Two things worth flagging.
 
-**"Built to work across many cultures from day one" conflates two costs.**
-Making the *codebase* script-agnostic, RTL-correct and multi-currency costs
-maybe 15% extra on the build and is absolutely worth paying now — retrofitting
-RTL into a shipped product is a rewrite. Making the *business* work in eight
-cultures means eight landing pages, eight Instagram funnels, eight local price
-points, eight payment rails and support in eight languages. That is not 15%
-extra; it is eight companies. Build the architecture for all of them, launch the
-funnel in one: Albanian-speaking diaspora in Switzerland, Germany and Austria.
-They have Western purchasing power, a Balkan wedding calendar, and you can
-support them in their own language from Prishtina. Win that, then port the
-funnel — the code will already be ready.
+**"Pay once, no subscriptions" is good positioning and bad business
+architecture — unless you fix it deliberately.** Consumer-facing it's a genuine
+differentiator against Withjoy and Greenvelope. But it means zero retention,
+CAC payback on purchase one, and revenue that collapses outside the wedding
+season. The fix is not a consumer subscription. It's (a) multiple purchases per
+wedding — save-the-date, main invitation, thank-you card — and (b) a
+wedding-planner tier that *is* recurring. The `orders`/`entitlements` split in
+[01](01-data-model.md) supports both already.
 
-**In South Asia and MENA, your competitor is not a SaaS — it's a freelancer with
-After Effects.** The culturally expected artefact in those markets is an animated
-MP4 invitation delivered on WhatsApp for $20–50, not a web page. A link-based
-product is a *harder* sell there than in the Balkans or DACH, not an easier one.
-If you intend to take those markets seriously, "export this invitation as a
-15-second vertical MP4" is probably a higher-leverage feature than your next six
-themes. It's Phase 2, not MVP, but it should shape the theme architecture now
-(see motion tokens in [02](02-theme-architecture.md)).
-
-**"One-time payment, no subscriptions" is good positioning and bad business
-architecture — unless you fix it deliberately.** Consumer-facing, it's a
-genuine differentiator against Withjoy/Greenvelope and matches Balkan
-expectations. But it means zero retention, CAC payback on purchase one, and
-revenue that collapses outside May–September. The fix is not to add a consumer
-subscription. It's (a) multiple purchases per wedding — save-the-date, main
-invitation, thank-you card — and (b) a wedding-planner/agency tier that *is*
-recurring. Plan for both in the data model now; the `orders`/`entitlements`
-split in [01](01-data-model.md) already supports it.
+**The hard part of this product is distribution, not engineering.** Everything
+in these documents is buildable in a few months. Nobody browses for invitation
+platforms — they search once, three weeks before they need it, and buy whatever
+their friend used. Budget as much time for finding the channel as for building
+the product. Detail in [09-risks.md](09-risks.md).

@@ -4,7 +4,7 @@
 COMPOSE ?= docker compose
 
 .DEFAULT_GOAL := help
-.PHONY: help up down restart build logs ps sh psql redis smoke landing fonts clean nuke
+.PHONY: help up down restart build logs ps sh psql redis smoke landing clean nuke
 
 help: ## Show this help
 	@grep -hE '^[a-zA-Z_-]+:.*?## ' $(MAKEFILE_LIST) \
@@ -46,9 +46,6 @@ smoke: ## Check every service answers
 
 landing: ## Serve only the landing page
 	$(COMPOSE) up -d landing
-
-fonts: ## List the script coverage baked into the og image
-	$(COMPOSE) run --rm --entrypoint verify-fonts og
 
 clean: ## Stop and remove containers and networks
 	$(COMPOSE) down --remove-orphans

@@ -27,15 +27,15 @@ probe "app"       "http://localhost:${WEB_PORT}/"
 probe "og health" "http://localhost:${OG_PORT}/healthz"
 probe "mailpit"   "http://localhost:${MAILPIT_UI_PORT}/"
 
-# A real render, not just a health ping: this is what catches a missing font
-# or a Chromium that starts but cannot paint.
+# A real render, not just a health ping: this is what catches a Chromium that
+# starts but cannot paint.
 echo
 echo "Rendering a test image through the og service:"
 tmp=$(mktemp /tmp/imvite-og-XXXXXX.jpeg)
 http_code=$(curl -s -o "$tmp" -w '%{http_code}' --max-time 30 \
   -X POST "http://localhost:${OG_PORT}/render" \
   -H 'content-type: application/json' \
-  --data '{"html":"<!doctype html><meta charset=utf-8><body style=\"margin:0;display:grid;place-items:center;height:630px;background:#FBF7F0;font:600 64px Georgia,serif\"><div><div>Arta &amp; Besnik</div><div style=\"font-size:40px\" lang=ar dir=rtl>أروى ومروان</div><div style=\"font-size:40px\" lang=ur dir=rtl>عائشہ اور بلال</div></div>","width":1200,"height":630}' \
+  --data '{"html":"<!doctype html><meta charset=utf-8><body style=\"margin:0;display:grid;place-items:center;height:630px;background:#FBF7F0;font:600 64px Georgia,serif\"><div style=\"text-align:center\"><div>Anna &amp; Luis</div><div style=\"font-size:28px;opacity:.7\">25 July 2026</div></div>","width":1200,"height":630}' \
   2>/dev/null)
 
 if [ "$http_code" = "200" ] && [ -s "$tmp" ]; then

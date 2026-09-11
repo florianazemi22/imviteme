@@ -34,9 +34,9 @@ The whole model exists to keep these three independent:
   migration. If that ever stops being true, the abstraction has leaked and you
   fix it immediately, not later.
 
-The practical test: **a user must be able to switch from a minimalist Latin
-theme to an ornate Arabic one and back without losing a single character of
-content, and without their purchased add-ons changing.**
+The practical test: **a user must be able to switch from a minimalist theme to
+an ornate one and back without losing a single character of content, and
+without their purchased add-ons changing.**
 
 ---
 
@@ -48,7 +48,6 @@ users
   email citext unique
   password_hash text null          -- null = magic-link only account
   display_name text
-  ui_locale text                   -- BCP-47, for the dashboard
   country_code char(2) null        -- last known billing country (pricing band)
   created_at, updated_at, deleted_at
 ```
@@ -84,13 +83,7 @@ invitations
   event_kind text fk-> event_kinds.code
   theme_id uuid fk-> themes
   theme_version int                 -- PINNED at publish; see §1.5
-  primary_locale text               -- e.g. 'sq', 'ar', 'tr'
-  secondary_locale text null        -- bilingual side-by-side
-  locale_display enum(toggle, stacked, split)  -- how two languages coexist
-  text_direction enum(auto, ltr, rtl)          -- 'auto' derives from locale
   timezone text                     -- IANA, e.g. 'Europe/Belgrade'
-  calendar_display enum(gregorian, hijri, both, hebrew)
-  hijri_override text null          -- host-typed; the computed value is only a suggestion
   numeral_system enum(latn, arab, deva) default 'latn'
   published_at timestamptz null
   expires_at timestamptz null       -- link lifetime, driven by entitlements
@@ -107,12 +100,12 @@ Notes on specific columns:
 
 - **`slug`** — short, pronounceable, CSPRNG-derived, collision-checked. Never
   sequential (leaks volume and enables enumeration of other people's weddings).
-  Something like `arta-besnik-x7k2`. Let paid users set a vanity slug; that's an
+  Something like `anna-luis-x7k2`. Let paid users set a vanity slug; that's an
   add-on SKU.
-- **`timezone` on the invitation, and again on each sub-event.** Diaspora
-  weddings genuinely span zones: nikah in Prishtina, reception in Zurich two
-  weeks later. Store all instants as `timestamptz` (UTC) and carry the IANA zone
-  separately. Never store local wall-clock time in a naive column.
+- **`timezone` on the invitation, and again on each sub-event.** A rehearsal
+  dinner and a reception are not always in the same place, and destination
+  weddings span zones. Store all instants as `timestamptz` (UTC) and carry the
+  IANA zone separately. Never store local wall-clock time in a naive column.
 - **`content_hash`** — recomputed on every save of content/sections/events. It is
   the cache key for the OG image and the purge key for the CDN. See [07](07-link-previews.md).
 - **`expires_at`** — driven by the `link_lifetime_days` entitlement, not hardcoded.
@@ -121,25 +114,24 @@ Notes on specific columns:
 
 ```
 event_kinds (seeded catalog, not user data)
-  code text pk              -- 'wedding','engagement','nikah','mehndi','sangeet',
-                            -- 'baraat','civil','baptism','circumcision',
-                            -- 'quinceanera','bar_mitzvah','bat_mitzvah',
-                            -- 'graduation','birthday','save_the_date'
-  family text               -- 'wedding','religious','coming_of_age','milestone'
+  code text pk              -- 'wedding','engagement','civil','rehearsal_dinner',
+                            -- 'baptism','birthday','anniversary','graduation',
+                            -- 'save_the_date','party'
+  family text               -- 'wedding','milestone','religious'
   default_sections jsonb    -- ordered section types + starter defaults
-  default_sub_events jsonb  -- e.g. nikah -> [nikah, walima]
+  default_sub_events jsonb  -- e.g. wedding -> [ceremony, reception]
   sort_order int
   is_active boolean
 ```
 
-**Display names are not in this table.** They live in translation catalogs
-(`messages+intl-icu.sq.yaml` etc.) keyed `event_kind.nikah`. Adding a locale must
-never mean a data migration.
+**Display names are not in this table.** They live in the application's
+translation catalog keyed `event_kind.<code>`, so renaming an event kind for
+the UI is never a data migration.
 
-This is why "support 15 event types" is nearly free: an event kind is a label, a
-default section set and a default sub-event set. The rendering machinery is
-identical. The expensive part is culturally correct *copy* and *default imagery*
-per kind — that's translation and design work, not engineering.
+This is why supporting a dozen event types is nearly free: an event kind is a
+label, a default section set and a default sub-event set. The rendering
+machinery is identical. The expensive part is the *copy* and *default imagery*
+per kind — design work, not engineering.
 
 ---
 
@@ -148,7 +140,7 @@ per kind — that's translation and design work, not engineering.
 Three options were on the table and I'm rejecting two:
 
 - **Normalised columns** (`bride_name`, `groom_name`, `ceremony_venue`…) — breaks
-  the moment you add quinceañera, bar mitzvah or a single-host birthday. Rejected.
+  the moment you add a christening or a single-host birthday. Rejected.
 - **One `content jsonb` blob per invitation** — flexible, but you lose ordering,
   per-section visibility, per-section entitlement gating, and partial saves.
   Rejected.
@@ -192,47 +184,30 @@ Fixed, versioned, and shared by every theme:
 venues are relational (§1.6) because you need to query and join them for
 per-guest scoping. This is the one place I'd resist putting data in jsonb.
 
-### Localised strings inside `data`
-
-Every translatable field in `data` is a **locale map**, enforced by the JSON
-Schema:
+### What `data` looks like
 
 ```json
 {
-  "headline": { "sq": "Arta & Besnik", "de": "Arta & Besnik" },
-  "subtitle": { "sq": "Na bëni nder me praninë tuaj",
-                "de": "Wir freuen uns auf Sie" },
+  "headline": "Anna & Luis",
+  "subtitle": "We would love you to join us",
   "image_id": "0192f3a1-...",
   "alignment": "center"
 }
 ```
 
-Non-translatable fields (ids, enums, URLs, numbers) are plain values.
+Every section type has its own JSON Schema, validated at the application
+boundary. A section may not carry a field its schema does not declare, and a
+theme may not read one.
 
-**Why inline locale maps rather than a `*_translations` table:** an invitation
-carries at most two locales, always rendered together or toggled. A translations
-table buys you "add a 9th language without touching rows" — which you will never
-need — at the cost of a join per section per locale on your hottest read path,
-plus a much fussier editor. Inline wins. The cost is that "show me every
-untranslated field" is a jsonb walk rather than a `LEFT JOIN … IS NULL`; write
-that as one recursive PHP function over the schema and move on.
+### Theme labels are not content
 
-**Hard cap of two locales per invitation.** Not a technical limit — a product
-decision. Three languages side by side is unreadable on a phone, and the editor
-UX degrades badly. If a customer genuinely needs three, sell them two
-invitations.
+Default labels a theme ships — "Ceremony", "Reception", "Will you attend?" —
+live in the application's translation catalog keyed `theme.label.*`, not in
+`invitation_sections.data`. The host may override any of them per invitation,
+which writes the override into the section `data`.
 
-### Application UI strings are a separate system
-
-Buttons, validation messages, "Will you attend?", relative dates, pluralisation
-— these are **not** content. They live in Symfony translation catalogs
-(`messages+intl-icu.<locale>.yaml`) and `vue-i18n` for the editor, with ICU
-MessageFormat for plurals and gender. Themes may ship default labels
-(`theme.label.ceremony`) which the host can override per invitation into the
-section `data`.
-
-Keep these two systems visibly separate. Conflating them is how you end up
-unable to fix a typo in a button without republishing 4,000 invitations.
+Keep the two separate. Conflating them is how you end up unable to fix a typo
+in a default label without republishing 4,000 invitations.
 
 ---
 
@@ -246,7 +221,6 @@ themes
   current_version int
   tier enum(standard, premium)     -- drives which entitlement unlocks it
   supported_sections text[]
-  supported_scripts text[]         -- ISO 15924: latn, arab, cyrl, deva, grek, hebr, hani
   capabilities jsonb               -- {music:true, parallax:true, photo_slots:6,
                                    --  hero_image_aspect:"3/4", supports_two_column_bilingual:true}
   preview_assets jsonb
@@ -282,16 +256,16 @@ get wrong.
 invitation_events                  -- the sub-events
   id uuid pk
   invitation_id uuid fk
-  code text                        -- 'nikah','mehndi','baraat','ceremony',
-                                   -- 'reception','walima','civil','after_party'
-  title jsonb                      -- locale map; overrides catalog label
-  description jsonb null
+  code text                        -- 'ceremony','reception','rehearsal_dinner',
+                                   -- 'civil','brunch','after_party'
+  title text                       -- overrides catalog label
+  description text null
   starts_at timestamptz
   ends_at timestamptz null
   timezone text                    -- may differ from the invitation
   is_time_tbc boolean              -- "evening, time TBC" is extremely common
   venue_id uuid fk-> venues null
-  dress_code jsonb null
+  dress_code text null
   position int
   default_invited boolean          -- guests are invited unless scoped out
   requires_rsvp boolean            -- a henna night may be informational only
@@ -300,13 +274,12 @@ invitation_events                  -- the sub-events
 venues
   id uuid pk
   invitation_id uuid fk
-  name jsonb                       -- locale map (venue names get transliterated)
-  address jsonb                    -- locale map, free text (do not normalise;
-                                   -- address formats differ wildly by country)
+  name text
+  address text                     -- free text; do not normalise
   lat numeric(9,6) null
   lng numeric(9,6) null
   map_url text null                -- host-pasted Google/Apple Maps link
-  directions_note jsonb null
+  directions_note text null
   position int
 ```
 
@@ -334,8 +307,7 @@ guest_groups                 -- the unit that receives ONE link ("Familja Hoxha"
   id uuid pk
   invitation_id uuid fk
   label text                        -- internal, for the host's list
-  greeting jsonb null               -- locale map; what the guest sees
-  locale text null                  -- which of the two locales to show this group
+  greeting text null                -- what the guest sees
   token_hash bytea unique           -- sha256 of the link token; see §6.2
   token_hint char(4)                -- last 4 chars, so the host can match a link to a row
   seats_allocated int               -- total seats the host is offering
@@ -422,8 +394,8 @@ The most important separation in the model.
 
 ```
 features (seeded catalog)
-  code text pk                     -- 'personalised_links','second_language',
-                                   -- 'remove_branding','premium_themes',
+  code text pk                     -- 'personalised_links','remove_branding',
+                                   -- 'premium_themes',
                                    -- 'sub_events','custom_questions','gallery',
                                    -- 'music','guest_limit','link_lifetime_days',
                                    -- 'vanity_slug','photo_album','print_pack'

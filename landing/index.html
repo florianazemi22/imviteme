@@ -2,14 +2,13 @@
 <!--
   Imvite pre-launch landing page.
   Plain HTML + CSS. No build step, no framework, no npm, no third-party requests.
-  RTL smoke test: change dir="ltr" to dir="rtl" below and reload. See README.md.
 -->
 <html lang="en" dir="ltr">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Imvite — digital invitations with RSVP, in any language</title>
-<meta name="description" content="Digital invitations for weddings and life events. Pick a theme, share a link and a QR code, and guests RSVP from their phone. Multi-day celebrations, any language and script, real RTL. Pay once.">
+<title>Imvite — digital wedding invitations with RSVP</title>
+<meta name="description" content="Digital invitations for weddings and life events. Pick a theme, share a link and a QR code, and guests RSVP from their phone. Multi-day celebrations, one payment, no subscription.">
 <link rel="canonical" href="https://imvite.me/">
 <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="styles.css">
@@ -21,8 +20,8 @@
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Imvite">
 <meta property="og:url" content="https://imvite.me/">
-<meta property="og:title" content="Imvite — digital invitations with RSVP, in any language">
-<meta property="og:description" content="Pick a theme, add your details, share a link and a QR code. Guests RSVP from their phone. Multi-day celebrations, any language and script. Pay once.">
+<meta property="og:title" content="Imvite — digital wedding invitations with RSVP">
+<meta property="og:description" content="Pick a theme, add your details, share a link and a QR code. Guests RSVP from their phone. Multi-day celebrations, one payment.">
 <meta property="og:locale" content="en_GB">
 <!-- TODO: assets/og.png does not exist yet. Create a 1200x630 PNG (commissioned or
      rendered from the theme tokens, per docs/architecture/07-link-previews.md) and
@@ -34,8 +33,8 @@
 
 <!-- Twitter / X -->
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="Imvite — digital invitations with RSVP, in any language">
-<meta name="twitter:description" content="Share a link and a QR code. Guests RSVP from their phone. Multi-day celebrations, any language and script. Pay once.">
+<meta name="twitter:title" content="Imvite — digital wedding invitations with RSVP">
+<meta name="twitter:description" content="Share a link and a QR code. Guests RSVP from their phone. Multi-day celebrations, one payment.">
 <meta name="twitter:image" content="https://imvite.me/assets/og.png">
 <meta name="twitter:image:alt" content="Imvite — digital invitations for weddings and life events.">
 </head>
@@ -46,8 +45,8 @@
 <header class="site-header">
   <div class="shell header-row">
     <a class="brand" href="#main" aria-label="Imvite, home">
-      <!-- Brand mark: authored SVG. Non-directional, so it never mirrors in RTL. -->
-      <svg class="icon brand-mark no-flip" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true" focusable="false">
+      <!-- Brand mark: authored SVG. -->
+      <svg class="icon brand-mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true" focusable="false">
         <path d="M16 3.5c3.6 4 6.3 7.2 6.3 11.2A6.3 6.3 0 0 1 16 21a6.3 6.3 0 0 1-6.3-6.3c0-4 2.7-7.2 6.3-11.2Z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/>
         <path d="M16 21v7.5M11 26h10" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
         <circle cx="16" cy="13.4" r="1.9" fill="currentColor"/>
@@ -56,7 +55,7 @@
     </a>
 
     <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="site-nav" hidden>
-      <svg class="icon no-flip" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" focusable="false">
+      <svg class="icon" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" focusable="false">
         <path d="M4 7h16M4 12h16M4 17h16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
       </svg>
       <span>Menu</span>
@@ -66,7 +65,6 @@
       <ul>
         <li><a href="#how">How it works</a></li>
         <li><a href="#multi-day">Multi-day</a></li>
-        <li><a href="#languages">Languages</a></li>
         <li><a href="#pricing">Pricing</a></li>
         <li><a href="#faq">FAQ</a></li>
       </ul>
@@ -85,7 +83,7 @@
         <p class="lede">
           Pick a theme, add your details, and share a link with a QR code.
           Guests open it on their phone and reply in under a minute — no app,
-          no account. Several days, several languages, one payment.
+          no account. Several days, one invitation, one payment.
         </p>
 
         <form class="signup" action="/subscribe" method="post" data-signup>
@@ -143,12 +141,12 @@
                 <circle cx="76" cy="12" r="1.6" fill="currentColor"/>
               </svg>
               <p class="card-kicker">Together with their families</p>
-              <p class="card-names"><bdi>Arta &amp; Besnik</bdi></p>
-              <p class="card-date">Saturday, 18 July · Prishtina</p>
+              <p class="card-names"><bdi>Anna &amp; Luis</bdi></p>
+              <p class="card-date">Saturday, 18 July · Bath</p>
               <!-- Photo slot: commissioned photography goes here. -->
               <div class="photo-slot" role="img" aria-label="Placeholder for commissioned photography"></div>
               <div class="card-days">
-                <span>Henna</span><span>Nikah</span><span>Reception</span>
+                <span>Rehearsal</span><span>Ceremony</span><span>Reception</span>
               </div>
               <p class="card-rsvp">Will you join us?</p>
               <div class="card-buttons"><span class="yes">Yes</span><span class="no">Sadly, no</span></div>
@@ -222,10 +220,11 @@
         <p class="eyebrow">Multi-day celebrations</p>
         <h2 id="multiday-title">Five days. One invitation. The right guests for each day.</h2>
         <p>
-          A wedding is rarely one evening. There is a henna night for the bride's
-          side, a nikah for close family, a ceremony, then four hundred people at
-          the reception. Most invitation tools make you build that as separate
-          events, or give up and invite everybody to everything.
+          A wedding is rarely one evening. There is a welcome dinner for people
+          who travelled, a rehearsal for the wedding party, the ceremony, then
+          two hundred people at the reception and a brunch the morning after.
+          Most invitation tools make you build that as separate events, or give
+          up and invite everybody to everything.
         </p>
         <p>
           Imvite keeps it as one invitation with several days inside it. You
@@ -242,15 +241,15 @@
         <h3 class="demo-title">The same invitation, two households</h3>
         <div class="demo-pair">
           <div class="demo-card">
-            <p class="demo-who"><bdi>Familja Hoxha</bdi> · 4 seats</p>
+            <p class="demo-who"><bdi>The Hartley family</bdi> · 4 seats</p>
             <ul class="day-list">
-              <li><span class="day-dot in" aria-hidden="true"></span>Henna night <span class="day-when">Thu 16</span></li>
-              <li><span class="day-dot in" aria-hidden="true"></span>Nikah <span class="day-when">Fri 17</span></li>
+              <li><span class="day-dot in" aria-hidden="true"></span>Welcome dinner <span class="day-when">Thu 16</span></li>
+              <li><span class="day-dot in" aria-hidden="true"></span>Ceremony <span class="day-when">Fri 17</span></li>
               <li><span class="day-dot in" aria-hidden="true"></span>Reception <span class="day-when">Sat 18</span></li>
             </ul>
           </div>
           <div class="demo-card">
-            <p class="demo-who"><bdi>Familja Krasniqi</bdi> · 2 seats</p>
+            <p class="demo-who"><bdi>The Okafor family</bdi> · 2 seats</p>
             <ul class="day-list">
               <li><span class="day-dot in" aria-hidden="true"></span>Reception <span class="day-when">Sat 18</span></li>
             </ul>
@@ -261,74 +260,6 @@
     </div>
   </section>
 
-  <!-- ================= LANGUAGES ================= -->
-  <section id="languages" class="band" aria-labelledby="lang-title">
-    <div class="shell">
-      <p class="eyebrow">Any language, any script</p>
-      <h2 id="lang-title">Your names, set properly, in your own alphabet.</h2>
-      <p class="section-lede">
-        Two languages on one invitation, side by side or with a switch, for the
-        families who do not share one. Right-to-left is built into the layout,
-        not bolted on: this page uses the same logical layout rules the
-        invitations do, which is why it also reads correctly in Arabic or Hebrew.
-      </p>
-
-      <!--
-        Specimen block. Rendered with the visitor's own system fonts, which cover
-        most of these scripts on most devices.
-        In the product, each script is bound to a self-hosted, subsetted face
-        (Noto Naskh Arabic for Arabic, Noto Nastaliq Urdu for Urdu, Noto Sans
-        Devanagari, and so on) — see docs/architecture/03-i18n-and-typography.md §3.3.
-        A real commissioned display face would be wired in at --font-display.
-      -->
-      <ul class="specimens">
-        <li class="specimen" lang="sq" dir="ltr">
-          <p class="specimen-names"><bdi>Arta &amp; Besnik</bdi></p>
-          <p class="specimen-meta">Albanian · Latin</p>
-        </li>
-        <li class="specimen" lang="ar" dir="rtl">
-          <p class="specimen-names"><bdi>أروى ومروان</bdi></p>
-          <p class="specimen-meta" dir="ltr">Arabic · Arabic script, right to left</p>
-        </li>
-        <li class="specimen specimen-tall" lang="ur" dir="rtl">
-          <p class="specimen-names"><bdi>عائشہ اور بلال</bdi></p>
-          <p class="specimen-meta" dir="ltr">Urdu · Nastaliq needs the room, so it gets it</p>
-        </li>
-        <li class="specimen" lang="hi" dir="ltr">
-          <p class="specimen-names"><bdi>प्रिया और अर्जुन</bdi></p>
-          <p class="specimen-meta">Hindi · Devanagari</p>
-        </li>
-        <li class="specimen" lang="sr" dir="ltr">
-          <p class="specimen-names"><bdi>Ана и Никола</bdi></p>
-          <p class="specimen-meta">Serbian · Cyrillic</p>
-        </li>
-        <li class="specimen" lang="el" dir="ltr">
-          <p class="specimen-names"><bdi>Άννα &amp; Νίκος</bdi></p>
-          <p class="specimen-meta">Greek · tonos intact, never uppercased</p>
-        </li>
-        <li class="specimen" lang="he" dir="rtl">
-          <p class="specimen-names"><bdi>נועה ויונתן</bdi></p>
-          <p class="specimen-meta" dir="ltr">Hebrew · Hebrew script, right to left</p>
-        </li>
-        <li class="specimen" lang="tr" dir="ltr">
-          <p class="specimen-names"><bdi>Zeynep &amp; Emre</bdi></p>
-          <p class="specimen-meta">Turkish · dotted and dotless i, handled</p>
-        </li>
-      </ul>
-      <p class="micro">
-        Names above are examples we wrote, not customers. They are drawn here with
-        the fonts already on your device; the invitations themselves ship a proper
-        face for each script.
-      </p>
-
-      <ul class="tick-list">
-        <li>Two languages per invitation, stacked or behind a switch.</li>
-        <li>Dates in the calendar your family uses, including a Hijri line you can correct by hand.</li>
-        <li>Guest names sorted the way your language sorts them, not the way a database does.</li>
-        <li>Mixed scripts in one line — a Latin hotel name inside an Arabic sentence — set the right way round.</li>
-      </ul>
-    </div>
-  </section>
 
   <!-- ================= SHARING ================= -->
   <section id="sharing" class="band band-alt" aria-labelledby="share-title">
@@ -365,14 +296,14 @@
                 <rect width="200" height="100" fill="none"/>
                 <path d="M20 62c14-18 28-18 42 0s28 18 42 0 28-18 42 0 20 10 34 4" fill="none" stroke="currentColor" stroke-width="1.1" opacity=".5"/>
                 <path d="M100 22c4 5 6.5 8 6.5 11a6.5 6.5 0 0 1-13 0c0-3 2.5-6 6.5-11Z" fill="currentColor" opacity=".55"/>
-                <text x="100" y="52" text-anchor="middle" font-size="13" fill="currentColor" font-family="Georgia, serif">Arta &amp; Besnik</text>
+                <text x="100" y="52" text-anchor="middle" font-size="13" fill="currentColor" font-family="Georgia, serif">Anna &amp; Luis</text>
                 <text x="100" y="70" text-anchor="middle" font-size="7" fill="currentColor" opacity=".75" letter-spacing="1.2">18 KORRIK 2026</text>
               </svg>
             </div>
-            <p class="preview-title">Arta &amp; Besnik — 18 July 2026</p>
+            <p class="preview-title">Anna &amp; Luis — 18 July 2026</p>
             <p class="preview-url">imvite.me</p>
           </div>
-          <p class="chat-link">imvite.me/i/arta-besnik</p>
+          <p class="chat-link">imvite.me/i/anna-luis</p>
           <span class="chat-time">21:14</span>
         </div>
       </div>
@@ -390,19 +321,18 @@
       </p>
       <ul class="chips">
         <li>Engagement</li>
-        <li>Nikah</li>
-        <li>Henna &amp; mehndi night</li>
         <li>Save the date</li>
-        <li>Baptism</li>
-        <li>Quinceañera</li>
-        <li>Bar &amp; bat mitzvah</li>
+        <li>Civil ceremony</li>
+        <li>Rehearsal dinner</li>
+        <li>Christening</li>
+        <li>Anniversary</li>
         <li>Graduation</li>
         <li>Milestone birthday</li>
         <li>Thank-you card</li>
       </ul>
       <p class="micro">
-        Weddings, engagements and nikah come first at launch. The rest follow
-        close behind — same machinery, different wording and defaults.
+        Weddings, engagements and save-the-dates come first at launch. The rest
+        follow close behind — same machinery, different wording and defaults.
       </p>
     </div>
   </section>
@@ -423,7 +353,6 @@
           <p class="price"><span class="amount">€29</span> <span class="once">once</span></p>
           <ul class="tick-list">
             <li>One invitation, one date</li>
-            <li>One language</li>
             <li>Public link and a QR code</li>
             <li>RSVP with party size and a message</li>
             <li>Up to 150 guest entries, paste or CSV</li>
@@ -438,7 +367,6 @@
           <p class="plan-note">Everything in Basic, and the parts most families need.</p>
           <ul class="tick-list">
             <li>Multi-day events with per-guest scoping</li>
-            <li>A second language, side by side or toggled</li>
             <li>Personal links per household, plus-ones</li>
             <li>Premium themes, gallery, music, countdown</li>
             <li>Custom RSVP questions and meal preference</li>
@@ -452,7 +380,7 @@
           <p class="plan-note">Take any of these with either tier.</p>
           <ul class="addon-list">
             <li><span>Remove the Imvite footer</span> <span class="addon-price">€19</span></li>
-            <li><span>Vanity link, imvite.me/arta-besnik</span> <span class="addon-price">€9</span></li>
+            <li><span>Vanity link, imvite.me/anna-luis</span> <span class="addon-price">€9</span></li>
             <li><span>Print pack, press-ready PDF with QR</span> <span class="addon-price">€15</span></li>
             <li><span>Ten-year archive</span> <span class="addon-price">€19</span></li>
             <li><span>A second invitation for the same day</span> <span class="addon-price">€19</span></li>
@@ -488,7 +416,7 @@
           <div class="faq-body">
             <p>Your invitation is published straight away. You get the public link,
             the QR code, the link preview with your names on it, and a share screen
-            with a message already written in your language. Your dashboard opens
+            with a message already written for you. Your dashboard opens
             at the same moment, so you can start sending and watching replies the
             same evening.</p>
           </div>
@@ -528,14 +456,11 @@
         </details>
 
         <details>
-          <summary>Which languages can I use?</summary>
+          <summary>Can I change the wording?</summary>
           <div class="faq-body">
-            <p>Any language you can type. Your own words are your own — we never
-            translate them. Two languages can sit on one invitation, side by side
-            or behind a switch, which is what a mixed-family wedding usually needs.
-            Right-to-left scripts are laid out properly rather than mirrored badly.</p>
-            <p>The buttons and emails around your words ship in Albanian, German,
-            English, Turkish and Arabic at launch, with more as we open each market.</p>
+            <p>All of it. Every heading, label and button on your invitation can
+            be rewritten in your own words, and nothing you write is ever
+            changed or translated for you.</p>
           </div>
         </details>
 
@@ -565,7 +490,7 @@
   <!-- ================= CLOSING SIGN-UP ================= -->
   <section id="signup" class="band band-close" aria-labelledby="signup-title">
     <div class="shell narrow center">
-      <svg class="ornament ornament-close no-flip" viewBox="0 0 180 28" width="180" height="28" aria-hidden="true" focusable="false">
+      <svg class="ornament ornament-close" viewBox="0 0 180 28" width="180" height="28" aria-hidden="true" focusable="false">
         <path d="M4 14h58M118 14h58" stroke="currentColor" stroke-width="1" fill="none" stroke-linecap="round"/>
         <path d="M90 4c6 6 9.5 8.5 9.5 10.5S96 20 90 26c-6-6-9.5-9.5-9.5-11.5S84 10 90 4Z" fill="none" stroke="currentColor" stroke-width="1"/>
         <circle cx="70" cy="14" r="2" fill="currentColor"/>

@@ -133,8 +133,8 @@ bank's own). Realistic assessment:
 
 ### Path C — Albanian entity
 
-- Same language, cheap, one border away, familiar accountants, and culturally
-  natural for your first market.
+- Cheap, one border away, familiar accountants, and straightforward to run from
+  Kosovo.
 - **But** Albania is not in Stripe's supported countries either, and is not in the
   EU, so you gain very little on the payments axis over Kosovo.
 - **Verdict:** fine as an operating/employment vehicle later, useless as the
@@ -157,38 +157,22 @@ bank's own). Realistic assessment:
 
 ---
 
-## 5.5 Regional payment methods — what actually matters
+## 5.5 Payment methods
 
-Once you have an MoR, cards, Apple Pay and Google Pay work nearly everywhere.
-These are the places where cards alone lose you real sales:
+With a merchant of record, cards plus Apple Pay and Google Pay cover almost
+everything. Two additions are worth making early:
 
-| Market | What you need | Notes |
-|---|---|---|
-| **Germany / Austria** | **PayPal**, SEPA direct debit, Klarna | Card penetration for online purchases is genuinely low. PayPal is close to mandatory in DE — and DE is your #1 diaspora market. **Highest-priority non-card method.** |
-| **Netherlands** | iDEAL | Dominant; near-universal |
-| **Turkey** | iyzico or PayTR, and **instalments (taksit)** | Turkish consumers expect to split even small purchases across 3–6 instalments; the option is a conversion feature in itself. Requires a Turkish entity or a local PSP relationship, so realistically Phase 3. MoR card acceptance works in the meantime but converts worse. |
-| **Saudi Arabia** | **mada** | Domestic debit scheme on most Saudi cards; a "Visa/Mastercard only" checkout fails a lot of them. Via Moyasar/Tap/HyperPay. |
-| **UAE / Gulf** | Cards work fine; Tap Payments for local optimisation | Lower priority than mada |
-| **Kuwait / Bahrain** | KNET / BENEFIT | Domestic schemes, same problem as mada |
-| **Egypt / Morocco** | Fawry (EG), local cards, cash-on-delivery habits | Band C anyway; low absolute revenue. Deprioritise. |
-| **India** | UPI (Razorpay/Cashfree) | UPI is overwhelmingly dominant. Razorpay requires an Indian entity. Also note RBI card-on-file tokenisation rules. Realistically Phase 3+ and probably only if India proves out. |
-| **Pakistan** | JazzCash, Easypaisa | Low card penetration; same structural problem |
-| **Brazil** | **PIX**, Boleto | PIX is now the default payment method in Brazil; cards alone leave most of the market on the table. Via dLocal/EBANX/Mercado Pago. |
-| **Mexico** | OXXO, SPEI, Mercado Pago | |
-| **Balkans (XK/AL/MK)** | Bank transfer, **cash**, card | Keep a manual bank-transfer path forever for the home market. It converts, and it costs you a webhook handler you already have. |
+- **PayPal.** Still a meaningful share of consumer checkouts, and it rescues the
+  customer whose card is declined at 11pm the night before they wanted to send
+  their invitations. Most MoRs include it; confirm before you sign.
+- **A manual bank-transfer path.** You already need it for the pre-checkout
+  phase (§5.4), and it costs you nothing to keep afterwards. `orders.provider =
+  'bank_transfer'` runs the same entitlement resolver as everything else.
 
-### Sequencing
-
-- **Phase 1:** MoR (cards + Apple/Google Pay worldwide) + **PayPal** + manual
-  bank transfer for the Balkans. That covers, at a rough guess, 85% of your
-  realistic early revenue.
-- **Phase 2:** iDEAL/Klarna (usually already inside your MoR), local Balkan
-  acquiring.
-- **Phase 3:** only where a market proves it deserves the integration work —
-  iyzico for Turkey, Tap/Moyasar for the Gulf, dLocal for LatAm.
-
-**Don't build for a market before it has bought anything.** Each local rail is
-~2 weeks of integration plus ongoing reconciliation. That's a theme and a half.
+Everything beyond that — local schemes, instalments, wallets — is a per-market
+integration of roughly two weeks plus ongoing reconciliation. **Don't build for
+a market before it has bought anything.** Record `billing_country` on every
+order from day one and let the data tell you if and when that changes.
 
 ---
 

@@ -9,20 +9,20 @@ dramatic it sounds.
 
 You can build this. That is not in question, and it's also not the problem.
 
-The problem: in nine months you will have twelve beautiful themes, six languages,
-flawless RTL, and forty visitors a month. Digital invitations are a **zero-intent,
+The problem: in nine months you will have twelve beautiful themes and forty
+visitors a month. Digital invitations are a **zero-intent,
 zero-retention, once-in-a-lifetime search**. Nobody browses for invitation
 platforms. They search once, from a phone, three weeks before they need it, and
 they buy whatever their cousin used.
 
 That means distribution is:
-- **SEO in each language** — "ftesa dasme online", "digitale Hochzeitseinladung",
-  "düğün davetiyesi online", "دعوة زفاف الكترونية". Six months of lead time
-  minimum, and the content has to be genuinely native, not translated.
-- **Instagram and TikTok with local wedding creators** — this is where these
-  audiences actually are, and it's paid or relationship-driven work.
+- **SEO** — "online wedding invitations", "digital save the date", "wedding
+  RSVP website". Six months of lead time minimum, and the content has to be
+  genuinely good, not spun.
+- **Instagram and TikTok with wedding creators** — where this audience actually
+  is, and it's paid or relationship-driven work.
 - **Wedding planners and venues** — the highest-leverage channel and the one you
-  can start today with a WhatsApp message. One planner = 30 weddings a year.
+  can start today with a message. One planner = 30 weddings a year.
 - **Word of mouth**, which is why the "Made with Imvite" footer is a growth loop
   and should never be free to remove.
 
@@ -30,28 +30,9 @@ That means distribution is:
 for the product, from Phase 0. If you can't, then the plan is wrong, not the
 execution.
 
-**Concrete mitigation:** before you write theme #2, get five wedding planners in
-Prishtina, Tirana, Zurich and Stuttgart on the phone. Not a survey — a call.
-If you can't get five planners interested in a free trial, more themes won't fix
-it.
-
----
-
-## 9.2 The "many cultures from day one" trap
-
-Covered in [README](README.md), restated because it's the second most likely
-failure: **code internationalisation is cheap, market internationalisation is
-not.** Supporting eight languages in the product costs you ~15% extra build time.
-Supporting eight *markets* costs you eight SEO efforts, eight content
-strategies, eight payment integrations, eight support inboxes and eight sets of
-culturally correct default themes — with revenue split eight ways, none of which
-reaches critical mass.
-
-The specific failure mode: you spread across markets, are #7 in all of them,
-build brand recognition in none, and run out of runway. Meanwhile a competitor
-who owns Albanian weddings entirely has a defensible business.
-
-**Build the architecture for all of them. Sell to one.**
+**Concrete mitigation:** before you write theme #2, get five wedding planners on
+the phone. Not a survey — a call. If you can't get five planners interested in a
+free trial, more themes won't fix it.
 
 ---
 
@@ -70,8 +51,8 @@ quarter can mean losing a year.
 
 Your failure mode is not "some downtime". It's "the invitation page was down on
 Saturday the 18th of July while 400 people tried to open it, and the family is
-now telling everyone they know." In tight-knit diaspora communities, one such
-incident propagates further than a year of marketing.
+now telling everyone they know." Weddings are a word-of-mouth market in both
+directions; one such incident propagates further than a year of marketing.
 
 Non-negotiables, all cheap:
 
@@ -80,7 +61,7 @@ Non-negotiables, all cheap:
   scenario from a catastrophe into an inconvenience.
 - **Pinned theme versions** ([01](01-data-model.md) §1.5) so a deploy can never
   alter a live invitation.
-- **A deploy freeze on Fridays and Saturdays, May–September.** Yes, really.
+- **A deploy freeze on Fridays and Saturdays through the wedding season.** Yes, really.
 - **Postgres PITR with a restore you have actually performed.**
 - **Uptime monitoring with a phone alert** (Better Stack / Uptime Robot) on the
   public render path specifically, not just the homepage.
@@ -95,9 +76,9 @@ Non-negotiables, all cheap:
 ### Dietary and allergy data is probably Article 9 special-category data
 
 Under GDPR, data revealing health is special category. "Coeliac", "nut allergy",
-"diabetic" are health data. "Halal", "kosher", "no pork" may reveal religious
-belief — also Article 9. You are collecting these by design, from **third parties
-(guests) who never signed up to your service**.
+"diabetic" are health data. Some dietary answers may also reveal religious
+belief, which is Article 9 as well. You are collecting these by design, from
+**third parties (guests) who never signed up to your service**.
 
 Mitigations, all worth doing:
 - Frame the field as **"meal preference"** with neutral preset options, plus an
@@ -169,34 +150,31 @@ theme library, and the rightsholder would be in the right.
 ### Kosovo specifics
 
 Kosovo's Law No. 06/L-082 on Personal Data Protection is GDPR-aligned. GDPR
-applies to you extraterritorially (Art. 3(2)) for EU customers regardless. No
-conflict, but you'll be complying with both.
+applies to you extraterritorially (Art. 3(2)) for EU and UK customers
+regardless. No conflict, but you'll be complying with both.
 
 ---
 
 ## 9.6 Competition — the honest map
 
 **You are not defensible technically.** Everything in this document can be
-rebuilt by a competent team in four months. Your moat is theme quality,
-localisation depth, and trust inside specific communities. Accept that and
-compete on execution and taste.
+rebuilt by a competent team in four months. Your moat is theme quality, the
+RSVP experience, and reliability on the day. Accept that and compete on
+execution and taste.
 
 | Competitor | Where | Threat |
 |---|---|---|
-| **eftesa.com** | Albanian | Direct, incumbent, knows the market. They can add languages faster than you can build a brand. **Your advantage is only that you're building multi-script from the schema up; use it or you have nothing.** |
-| **Withjoy, Zola, The Knot** | US | Free wedding websites, VC-funded. They will not localise to the Balkans or add Nastaliq. Not a real threat in your markets; a serious one if you chase the US. |
-| **Greenvelope, Paperless Post** | US/UK | Premium, English-first, card-aesthetic. They own the anglophone premium segment. Don't fight there. |
-| **Evite** | US | Free, ad-supported, downmarket. Irrelevant to you. |
-| **Local Turkish `davetiye` apps** | TR | Numerous, cheap (₺100–300), decent. Turkey is a crowded, price-compressed market. **Reconsider whether Turkey is really your phase-3 pick.** |
-| **Zankyou, Bodas.net** | ES/LatAm | Established, marketplace model |
-| **WedMeGood, ShaadiSaga** | IN | Marketplace-first with invitations attached; huge and entrenched |
-| **Freelancers on Instagram with After Effects** | MENA, South Asia | **The actual incumbent in those markets.** They deliver an animated MP4 to WhatsApp for $20–50, personally, in the customer's language, over DM. Your web-link product is a *different* format, and convincing that customer to want a link instead of a video is a market-education problem, not a feature gap. This is the biggest reason to be sceptical of an early MENA/South Asia push — and the reason MP4 export matters if you do go there. |
+| **Withjoy, Zola, The Knot** | US | Free wedding websites, VC-funded, enormous. They give away what you charge for, bundled with a registry that monetises separately. **The single hardest competitor to answer**, and the answer has to be that your paid product is better and simpler than their free one, not that it has more features. |
+| **Greenvelope, Paperless Post** | US/UK | Premium, card-aesthetic, well-designed. They own the top of the market. Competing on taste alone means competing with their design budget. |
+| **Evite** | US | Free, ad-supported, downmarket. Sets a "this should be free" anchor you have to work against. |
+| **Squarespace / Wix wedding templates** | global | Not invitation products, but they absorb the customer who wants a wedding *website*. Stay out of that lane — see the scope-creep risk below. |
+| **Canva + a PDF on WhatsApp** | everywhere | The real default for a lot of couples: design a card, export an image, send it. Free, and it does not collect RSVPs. **RSVP tracking is the entire reason to pay you** — lead with it.
 
 ---
 
 ## 9.7 Seasonality and one-shot economics
 
-Balkan, Turkish and South Asian weddings cluster heavily May–September. Revenue
+Weddings cluster heavily in the warm months. Revenue
 will be spiky and there is **no retention** — every year you start from zero
 customers. Implications:
 
@@ -215,11 +193,10 @@ customers. Implications:
 
 Two specific failure modes worth naming:
 
-- **Support in N languages.** Every launch language is an inbox in that language,
-  in a timezone, during a season when questions are urgent and emotional. This
-  breaks solo founders more reliably than technical debt does. Limit launch
-  languages to those you (or one cheap contractor) can genuinely cover. Invest
-  early in in-product help and canned responses.
+- **Support volume in season.** Questions arrive urgent and emotional, clustered
+  into a few months, in a timezone that may not be yours. This breaks solo
+  founders more reliably than technical debt does. Invest early in in-product
+  help and canned responses, and publish support hours.
 - **Wedding-week urgency.** A customer whose wedding is Saturday and whose QR
   code won't scan will call you at 23:00. Set expectations publicly (support
   hours), and build the product so those calls don't happen — which is what §9.4
@@ -233,10 +210,10 @@ Two specific failure modes worth naming:
    wants one more font, one more animation library, one more 3MB hero image. Set
    a hard CI budget (JS < 60KB gz, LCP < 2.5s on the `max-content` fixture) and
    fail the build. Without an enforced budget this *will* degrade.
-2. **Complex-script rendering regressions.** A font subsetting change drops an
-   OpenType feature and Arabic stops joining — and you won't notice, because you
-   don't read Arabic. The fixture matrix with pixel diffs is the only defence.
-   Have a native reader review each script once before launch.
+2. **Silent typography regressions.** A font subsetting change drops a weight or
+   a ligature set and every theme shifts slightly — the kind of thing nobody
+   reports but everyone perceives as cheap. The fixture matrix with pixel diffs
+   is the only defence.
 3. **The OG service as a single point of failure.** Chromium leaks memory and
    dies. Recycle the browser, health-check it, and make the publish flow degrade
    to a theme-generic OG image rather than blocking publication.
@@ -245,7 +222,7 @@ Two specific failure modes worth naming:
 5. **A guest-list leak across tenants.** One missing `WHERE invitation_id`.
    Enforce with a Doctrine filter and a test that asserts cross-tenant access
    returns 404.
-6. **Import encoding corruption.** Turkish/Albanian CSVs from Excel. Handled in
+6. **Import encoding corruption.** CP1252 CSVs out of Excel. Handled in
    [06](06-guests-and-rsvp.md) §6.5, but it'll bite if you skip it.
 
 ---
@@ -255,8 +232,6 @@ Two specific failure modes worth naming:
 **Technical risk is low. You will build this fine.**
 
 **Commercial risk is high and concentrated in one place:** whether you can reach
-the right people in one market cheaply enough to make a €29 one-time purchase
-work. Everything in the architecture above is designed so that when you find that
-channel, you can serve every other market without a rewrite — and so that until
-you find it, you haven't spent a year building for eight markets that haven't
-asked for you yet.
+the right people cheaply enough to make a €29 one-time purchase work, against
+competitors who give a similar thing away free. Find that channel before you
+build theme #4.

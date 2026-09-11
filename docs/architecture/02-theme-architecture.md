@@ -68,7 +68,7 @@ themes/nur/
     hero.html.twig
     schedule.html.twig
   assets/
-    fonts/                # self-hosted woff2, subset per script
+    fonts/                # self-hosted, subsetted woff2
     img/
     audio/default.m4a
   preview/
@@ -103,40 +103,18 @@ manifest fails the build.
   "capabilities": {
     "photo_slots": 6,
     "hero_image_aspect": "3/4",
-    "supports_bilingual_split": true,
     "supports_music": true,
     "max_headline_graphemes": 42
   },
 
-  "scripts": {
-    "latn": {
-      "fonts": {
-        "display": "Cormorant Garamond",
-        "body": "Inter",
-        "accent": "La Belle Aurore"
-      },
-      "line_height": { "display": 1.1, "body": 1.6 },
-      "letter_spacing": { "display": "0.02em" }
+  "typography": {
+    "fonts": {
+      "display": "Cormorant Garamond",
+      "body": "Inter",
+      "accent": "La Belle Aurore"
     },
-    "arab": {
-      "fonts": {
-        "display": "Aref Ruqaa",
-        "body": "Noto Naskh Arabic",
-        "accent": "Aref Ruqaa"
-      },
-      "line_height": { "display": 1.6, "body": 1.9 },
-      "letter_spacing": { "display": "0" },
-      "font_size_scale": 1.08
-    },
-    "deva": {
-      "fonts": { "display": "Tiro Devanagari Hindi", "body": "Noto Sans Devanagari", "accent": "Tiro Devanagari Hindi" },
-      "line_height": { "display": 1.5, "body": 1.85 },
-      "font_size_scale": 1.04
-    },
-    "cyrl": { "fonts": { "display": "Cormorant Garamond", "body": "Inter", "accent": "Inter" },
-              "line_height": { "display": 1.15, "body": 1.6 } },
-    "grek": { "fonts": { "display": "Cormorant Garamond", "body": "Inter", "accent": "Inter" },
-              "line_height": { "display": 1.15, "body": 1.6 } }
+    "line_height": { "display": 1.1, "body": 1.6 },
+    "letter_spacing": { "display": "0.02em" }
   },
 
   "motion": {
@@ -161,28 +139,14 @@ manifest fails the build.
 }
 ```
 
-### The rule that makes non-Latin scripts safe
-
-**`scripts` must contain an entry for every script listed in
-`themes.supported_scripts`, and CI fails if it doesn't.**
-
-This is the single highest-value constraint in the whole theme system. The
-failure it prevents: a designer picks a gorgeous Latin display face, an Arabic
-customer buys the theme, the browser falls back to a system font, and the
-invitation looks like a 1998 GeoCities page at the most emotionally significant
-moment of someone's life. The manifest makes the substitute face an explicit,
-reviewed design decision rather than a browser accident.
-
-A theme that hasn't been designed for Devanagari simply doesn't list `deva` in
-`supported_scripts`, and the theme picker filters it out for that customer. That
-is a perfectly honest outcome — better than shipping a broken one.
-
----
+The manifest is the reason the renderer can stay renderer-agnostic: it declares
+everything the core needs to know about a theme without the core reading a
+single line of the theme's templates. Adding a field here is a deliberate act;
+a theme cannot invent one.
 
 ## 2.4 Design tokens
 
-`tokens.css` contains **only** custom properties. No selectors beyond `:root` and
-the script/direction scopes.
+`tokens.css` contains **only** custom properties. No selectors beyond `:root`.
 
 ```css
 :root {
@@ -203,28 +167,12 @@ the script/direction scopes.
   --lh-display: 1.1;
   --lh-body: 1.6;
 
-  /* spacing — logical, never left/right */
   --space-inline: clamp(1rem, 5vw, 3rem);
   --space-block: clamp(2rem, 9vw, 6rem);
 
   --radius: 2px;
   --motion-duration: 600ms;
   --motion-ease: cubic-bezier(0.22, 1, 0.36, 1);
-}
-
-/* Script overrides, emitted server-side from the manifest */
-:root[data-script="arab"] {
-  --font-display: "Aref Ruqaa", "Noto Naskh Arabic", serif;
-  --font-body: "Noto Naskh Arabic", system-ui, sans-serif;
-  --lh-display: 1.6;
-  --lh-body: 1.9;
-  --fs-display: clamp(1.9rem, 8vw, 4rem);
-}
-:root[data-script="urdu"] {           /* Nastaliq is its own beast */
-  --font-display: "Noto Nastaliq Urdu", serif;
-  --font-body: "Noto Nastaliq Urdu", serif;
-  --lh-display: 2.1;
-  --lh-body: 2.2;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -235,7 +183,11 @@ the script/direction scopes.
 **Templates reference roles, never font names.** `font-family: var(--font-display)`.
 A template containing a literal font name is a CI failure (grep check, five lines).
 
----
+Self-host the fonts rather than linking Google's CDN: it removes a third-party
+connection on the hot path, and embedding Google Fonts has already produced
+GDPR fines in Germany. Pull the files with `google-webfonts-helper` or the
+`fontsource` packages, subset with `pyftsubset`, and preload only the display
+face.
 
 ## 2.5 Motion
 
@@ -251,7 +203,7 @@ and tunes them:
 | `fade-up` | opacity + 16px translate on enter |
 | `mask-reveal` | `clip-path` inset wipe, direction-aware |
 | `scale-in` | 0.96 → 1 with opacity |
-| `letter-cascade` | per-grapheme stagger — **Latin/Cyrillic/Greek only** |
+| `letter-cascade` | per-character stagger |
 | `parallax-layers` | 2–3 background layers, scroll-linked |
 | `petal-fall` | decorative particle layer, canvas, capped at 30 particles |
 | `ken-burns` | slow hero image drift |
@@ -269,17 +221,16 @@ Implementation:
 - Everything respects `prefers-reduced-motion` at the token level (above), so a
   theme cannot accidentally ignore it.
 
-**`letter-cascade` must be script-gated.** Splitting text into per-character spans
-destroys Arabic contextual shaping (letters stop joining) and breaks Devanagari
-conjuncts. The effect registry declares `"scripts": ["latn","cyrl","grek"]` and
-the renderer silently substitutes `fade-up` otherwise. This is exactly the kind
-of bug that ships to production and gets discovered by a customer.
+**`letter-cascade` splits text into per-character spans**, which breaks
+selection, copy-paste and screen readers if applied to anything but a short
+headline. Restrict it to the hero, and keep the underlying text intact in the
+accessibility tree.
 
-**If MP4 export becomes a Phase-2 feature** (see [README](README.md) pushback),
-this declarative motion vocabulary is what makes it tractable: you render the
-invitation in headless Chromium and drive a deterministic timeline, rather than
-trying to screen-record arbitrary per-theme JavaScript. Worth keeping in mind
-when you're tempted to let a theme "just add a little custom GSAP".
+Keeping the vocabulary declarative also keeps a video export tractable later:
+you render the invitation in headless Chromium and drive a deterministic
+timeline, rather than trying to screen-record arbitrary per-theme JavaScript.
+Worth remembering when you are tempted to let a theme "just add a little
+custom GSAP".
 
 ---
 
@@ -302,12 +253,12 @@ Non-negotiable behaviours:
 **Licensing — the part that can actually hurt you.** Do not build a library of
 recognisable songs. Options, in order of how much I'd recommend them:
 
-1. **Commission 8–15 original instrumental tracks** across the aesthetics you
-   need (Balkan/çifteli, oud/Arabic, Indian classical, piano, ambient, Latin
-   guitar). A composer on Fiverr/SoundBetter with a full buyout, work-for-hire
-   contract costs €100–400 per track. You own it outright, forever, with no
-   per-end-user licensing question. For ~€3,000 total this problem disappears
-   permanently. **This is what I'd do.**
+1. **Commission 8–15 original instrumental tracks** across the moods you need
+   (piano, strings, acoustic guitar, ambient, upbeat). A composer on
+   Fiverr/SoundBetter with a full buyout, work-for-hire contract costs €100–400
+   per track. You own it outright, forever, with no per-end-user licensing
+   question. For ~€3,000 total this problem disappears permanently.
+   **This is what I'd do.**
 2. **Production-music library (Epidemic Sound, Artlist, Musicbed).** Their
    standard subscriptions license *your* content, not content your customers
    publish on pages you host. You'd need their partner/API/enterprise tier. Get a
@@ -319,11 +270,10 @@ recognisable songs. Options, in order of how much I'd recommend them:
 4. **Embedding Spotify/YouTube.** Don't. Autoplay is blocked, the embed weighs
    more than your entire page, it's ugly, and it breaks offline.
 
-Religious audio (Quran recitation for nikah invitations, liturgical music for
-baptisms) is culturally expected in several target markets. The *text* is public
-domain; specific *recordings* are copyrighted. Commission or license these
-explicitly — and give the host an easy "no audio" option, because preferences on
-this are strong and divided.
+Liturgical music for christenings and church ceremonies raises the same
+question: the underlying work may be public domain, but a specific *recording*
+is not. Commission or license those explicitly — and always give the host an
+easy "no audio" option.
 
 ---
 
@@ -335,17 +285,10 @@ This is the mechanism. Without it, the promise decays within four themes.
 
 | fixture | what it stresses |
 |---|---|
-| `latn-short` | "Ana & Luis" — the happy path every designer tests |
-| `latn-long-de` | "Maximiliane Schörghuber-Wittelsbach & Konstantin Aleksandrov" |
-| `sq-diacritics` | "Ardhmëria Krasniqi-Gashi" — ë, ç ascender/descender collisions |
-| `tr-casing` | "İdil Çağlayan" — dotted/dotless i, `text-transform` traps |
-| `arab-rtl` | Arabic names + mixed Latin venue name (bidi) |
-| `urdu-nastaliq` | Nastaliq line-height and descender overlap |
-| `deva-hindi` | Devanagari conjuncts and the shirorekha |
-| `cyrl-sr` | Cyrillic in a Latin display face |
-| `grek` | Greek accents, uppercase tonos rule |
-| `hani-zh` | CJK line-breaking, no word spaces |
-| `he-rtl` | Hebrew + Latin mixed |
+| `short` | "Ana & Luis" — the happy path every designer tests |
+| `long-names` | "Alexandra Fitzwilliam-Hathersage & Christopher Beaumont" |
+| `one-word` | a single unbroken 28-character surname |
+| `accents` | acute, umlaut, cedilla — ascender/descender collisions |
 | `emoji-names` | because people do this |
 | `max-content` | 9 sub-events, 6 venues, 24 FAQ items, 40 photos |
 | `min-content` | names + one date, everything else empty |
@@ -357,16 +300,15 @@ This is the mechanism. Without it, the promise decays within four themes.
 2. No element overflows its container (`el.scrollWidth > el.clientWidth` on
    anything with `overflow: hidden`).
 3. No text clipped: compare `scrollHeight` to `clientHeight` on text blocks.
-4. Every rendered glyph resolves in a loaded font — no `.notdef` boxes. Check via
-   `document.fonts.check()` per script plus a pixel-diff against a known-good
-   baseline.
+4. Every web font actually loaded — `document.fonts.check()` for each declared
+   face, so a theme never ships silently rendering in the fallback stack.
 5. Screenshot diff against the committed baseline (`pixelmatch`, 0.1% threshold).
 6. Lighthouse/`web-vitals` budget on the `max-content` fixture: LCP < 2.5s on
    simulated Slow 4G, JS < 60KB gz.
 
-That's ~14 fixtures × 4 widths × N themes. At 12 themes it's ~672 screenshots —
-a few minutes in CI, and it is the entire reason you can ship theme #13 in two
-days without fear.
+That's 7 fixtures × 4 widths × N themes. At 12 themes it's ~336 screenshots —
+a couple of minutes in CI, and it is the entire reason you can ship theme #13 in
+two days without fear.
 
 **Run this matrix on the very first theme, before building the second.** The
 temptation will be to add it "once there are a few themes". By then three themes
@@ -386,18 +328,15 @@ Concrete rules, all cheap, all enforceable by lint:
   preview pane too.
 - **Never a fixed-height name container.** Names are the one field guaranteed to
   break your design; let them grow and push the layout down.
-- **`hyphens: auto` with `lang` set correctly** — critical for German compounds,
-  harmful if `lang` is wrong.
+- **`hyphens: auto` with `lang="en"` set on the document**, so long names break
+  sensibly rather than overflowing.
 - **`overflow-wrap: anywhere` on all user content containers** as a last-resort
   guard against an unbroken 40-character surname.
-- **A grapheme budget per theme** (`capabilities.max_headline_graphemes`), used by
-  the editor to show a soft warning — not a hard limit. Count graphemes with
-  `Intl.Segmenter`, not `.length`; a Devanagari conjunct or an emoji ZWJ sequence
-  is many code units and one visual character.
-- **No `text-transform: uppercase`** on user content. It's meaningless for Arabic
-  and Devanagari, it silently drops the tonos in Greek, and it produces `IDIL` for
-  Turkish `İdil` unless the `lang` attribute is right. If a theme's aesthetic
-  needs caps, apply it only under `[data-script="latn"]` and use a font's small-caps
-  feature rather than `text-transform`.
-
-Details and the RTL rules in [03-i18n-and-typography.md](03-i18n-and-typography.md).
+- **A character budget per theme** (`capabilities.max_headline_graphemes`), used
+  by the editor to show a soft warning — not a hard limit. Count with
+  `Intl.Segmenter`, not `.length`; an emoji ZWJ sequence is many code units and
+  one visual character.
+- **`text-transform: uppercase` only on theme chrome, never on names.** Accented
+  capitals and small caps rarely survive it well, and a user's name is the one
+  string you should render exactly as they typed it. If a theme's aesthetic
+  needs caps, use the font's small-caps feature.

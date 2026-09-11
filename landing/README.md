@@ -136,8 +136,8 @@ currently points at `#privacy`.
 
 ## The rules this page holds itself to
 
-The page is the product's own argument, so it obeys the product's typography and
-layout rules (`docs/architecture/03-i18n-and-typography.md`).
+The page is the product's own argument, so it holds itself to the standard the
+invitations will be held to.
 
 ### CSS logical properties only
 
@@ -148,39 +148,8 @@ No `margin-left`, no `padding-right`, no `text-align: left`, no `float`, no bare
 grep -niE 'left|right' landing/styles.css   # expected: no output at all
 ```
 
-Use `margin-inline`, `padding-block`, `inset-inline-start`, `border-inline-end`,
-`text-align: start`, `border-start-start-radius`. In the Symfony app this is
-enforced in CI by `stylelint` + `@csstools/stylelint-use-logical`; here it is
-hand-checked, so re-run the grep after any edit.
-
-### RTL smoke test
-
-In `index.html`, change the root element:
-
-```html
-<html lang="en" dir="ltr">   <!-- to -->
-<html lang="en" dir="rtl">
-```
-
-Reload. What you should see:
-
-- Everything mirrors: the header, the nav, the steps, the tick-list markers,
-  the FAQ chevrons, the addon prices, the chat bubble's tail and timestamp.
-- The arrow inside the two call-to-action buttons points the other way. It
-  carries `class="icon"`, and `[dir="rtl"] .icon { transform: scaleX(-1) }`
-  mirrors it.
-- The brand mark, the QR ornament and the divider ornaments do **not** mirror.
-  They carry `class="no-flip"`, which is the convention the themes use: icons
-  mirror by default, anything that must not (logos, a QR code, a clock face,
-  a checkmark) opts out.
-- Nothing overlaps, nothing scrolls sideways, no text is clipped.
-
-The Arabic, Urdu and Hebrew specimens in the "Any language, any script" section
-keep their own `dir="rtl"` regardless of the page direction, and the English
-captions under them carry `dir="ltr"` — so they stay correct in both modes. All
-name examples are wrapped in `<bdi>` for the same reason the themes do it.
-
-Change `dir` back to `ltr` when you are done; this page ships English only.
+Use `margin-inline`, `padding-block`, `inset-inline-start`, `text-align: start`.
+Terser than the physical properties, and they cost nothing.
 
 ### The rest
 
@@ -205,60 +174,3 @@ Change `dir` back to `ltr` when you are done; this page ships English only.
 
 ---
 
-## Adding a second locale
-
-This page is English only on purpose: the funnel launches in one market at a
-time (`docs/architecture/README.md`, decision 10). The structure below is what
-to do when the second one opens — Albanian and German are the likely first two.
-
-1. **Copy the page into a locale folder.** Keep English at the root and move
-   nothing:
-
-   ```
-   landing/
-     index.html          → https://imvite.me/          (en)
-     sq/index.html       → https://imvite.me/sq/
-     de/index.html       → https://imvite.me/de/
-     styles.css          shared, no changes needed
-     app.js              shared
-   ```
-
-   Reference the shared files with `../styles.css` and `../app.js` from inside a
-   locale folder.
-
-2. **Set the language and direction on `<html>`**, once, at the top:
-   `<html lang="sq" dir="ltr">`, `<html lang="ar" dir="rtl">`. Nothing else in
-   the stylesheet changes — that is the whole point of the logical properties.
-
-3. **Translate, do not transliterate the argument.** These pages carry SEO
-   intent per language ("ftesa dasme online", "digitale Hochzeitseinladung",
-   "düğün davetiyesi online"). A machine translation of the English page will
-   not rank and will not convert. Write each one native, and set the `<title>`
-   and meta description around the phrase people actually search in that
-   language.
-
-4. **Cross-link with `hreflang`** in every version's `<head>`:
-
-   ```html
-   <link rel="alternate" hreflang="en" href="https://imvite.me/">
-   <link rel="alternate" hreflang="sq" href="https://imvite.me/sq/">
-   <link rel="alternate" hreflang="de" href="https://imvite.me/de/">
-   <link rel="alternate" hreflang="x-default" href="https://imvite.me/">
-   ```
-
-   And update `og:locale` plus the `canonical` on each page.
-
-5. **Add a language switcher** in the header — plain links between the versions.
-   Do not auto-redirect on IP or `Accept-Language`; it breaks sharing and
-   annoys the diaspora buyer, who is exactly the visitor most likely to want a
-   language other than the one their connection suggests.
-
-6. **Prices.** The figures on this page are indicative band-A euro prices. A
-   locale page may show a different currency, but the band is decided at
-   checkout by the billing country of the card, never by the page the visitor
-   is reading (`docs/architecture/04-pricing-and-tiering.md` §4.4). Keep the
-   "adjusted by region, set by your card's country" line in every translation.
-
-7. **Check the RTL version for real** if the locale is Arabic. Set `dir="rtl"`,
-   and check the specimen block, the FAQ chevrons and the form row. The page is
-   built for it, but look anyway.

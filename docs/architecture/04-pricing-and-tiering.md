@@ -4,9 +4,8 @@
 
 ## 4.1 The pricing model in one line
 
-**One invitation = one purchase.** Two tiers plus à-la-carte add-ons, priced in
-three regional bands, band determined by the payment instrument's billing
-country.
+**One invitation = one purchase.** Two tiers plus à-la-carte add-ons, one
+currency, one price list.
 
 ---
 
@@ -26,13 +25,12 @@ behind payment moves the decision earlier, when they have nothing invested. Let
 them build it, fall in love with it, then charge to publish. This is the single
 most important pricing decision in the document.
 
-### Basic — band A **€29**
+### Basic — **€29**
 
 The floor. Must be genuinely usable, or it poisons the brand.
 
 - 1 invitation, 1 event date (sub-events readable but not RSVP-scoped)
 - Standard themes (not premium)
-- **1 language**
 - Public link + QR code (PNG)
 - **RSVP: yes/no + party size + one free-text message**
 - Guest list up to **150 entries**, manual + CSV import
@@ -41,12 +39,11 @@ The floor. Must be genuinely usable, or it poisons the brand.
 - Link live until **60 days after the event**
 - "Made with Imvite" footer
 
-### Plus — band A **€59**
+### Plus — **€59**
 
 Everything in Basic, plus:
 
 - **Premium themes**
-- **Second language**, side by side or toggle
 - **Multi-day sub-events with per-guest scoping**
 - **Personalised per-guest links** (greeting, prefilled, scoped)
 - Plus-one management
@@ -56,7 +53,7 @@ Everything in Basic, plus:
 - Link live **12 months** after the event
 - Priority support during the event week
 
-### Add-ons (à la carte, any tier) — band A
+### Add-ons (à la carte, any tier)
 
 | Add-on | Price | Why |
 |---|---|---|
@@ -102,82 +99,33 @@ direct consumer sales.**
 
 ---
 
-## 4.4 Regional pricing: three bands, one rule
+## 4.4 One price list
 
-### The bands
+One currency, one set of prices, shown tax-inclusive. No regional bands, no
+geo-detection, no "contact us for local pricing".
 
-| Band | Rough multiplier | Markets |
-|---|---|---|
-| **A** | 1.00 | US, CA, UK, DE, AT, CH, NL, BE, FR, IT, ES, Nordics, IE, AU, NZ, IL, AE, SA, QA, KW, BH, OM, SG, JP, KR |
-| **B** | 0.60 | PL, CZ, HU, RO, BG, GR, HR, SI, SK, Baltics, PT, TR, MX, BR, AR, CL, CO, MY, TH, ZA |
-| **C** | 0.35 | XK, AL, MK, RS, BA, ME, MD, UA, GE, AM, EG, MA, TN, DZ, JO, LB, IQ, IN, PK, BD, LK, NP, ID, PH, VN, NG, KE, most of Sub-Saharan Africa |
+This is the right call while there is one market. It removes a whole class of
+work — currency tables, FX drift, billing-country detection, arbitrage
+controls, an incoherent public pricing page — none of which earns anything
+until there is demand from somewhere the current price doesn't fit.
 
-So Basic is €29 / €17 / €10 and Plus is €59 / €35 / €20.
+What to keep in mind so this stays a cheap decision to revisit:
 
-**Three bands, not twenty.** A per-country ladder is a maintenance burden, makes
-your public pricing page incoherent, and invites screenshot-based "why do
-Bulgarians pay less than Romanians" arguments. Three is enough to capture most of
-the purchasing-power difference.
-
-**A ~3× spread is the ceiling.** Wider than that and arbitrage becomes worth the
-effort, and the band-A customer who discovers the band-C price feels cheated.
-
-### The rule that prevents arbitrage
-
-**Price by the billing country of the payment instrument, never by IP, never by a
-dropdown.**
-
-- IP/geo is for *display* on the pricing page only.
-- At checkout, the merchant-of-record returns the card's issuing/billing country.
-  That determines the band and the final charged amount.
-- If the billing country lands in a different band than the displayed price, show
-  the change explicitly before charge ("Prices are set by your card's country").
-- **Never let the customer select their country from a dropdown for pricing
-  purposes.** That's not anti-arbitrage theatre, it's the actual hole.
-
-### The insight that matters most
-
-**Your highest-value customer is a diaspora buyer paying band A for a wedding in
-a band C country.** A Kosovar in Zurich, a Pakistani in Birmingham, a Moroccan in
-Brussels — they hold a Swiss/UK/Belgian card, they're organising a 400-guest
-wedding back home, and they have Western purchasing power. They are the wedge.
-
-This means:
-- Band C must be determined by the *card*, not by the *event location*. An event
-  in Prishtina paid for with a Swiss card is band A. Correct, and not something to
-  apologise for.
-- Don't offer an "event country" field anywhere near pricing logic.
-- Market to the diaspora in their language, and the payment takes care of itself.
-
-### Practical anti-arbitrage measures
-
-Worth doing, in order:
-
-1. Billing-country-driven pricing (above). Does 90% of the work.
-2. **3D Secure on** for everything. Band C + stolen card is a known pattern, and
-   3DS shifts chargeback liability.
-3. Flag mismatch (IP country in band A, card in band C) for review above a
-   threshold. Don't block — false positives on legitimate travellers and diaspora
-   are common and expensive.
-4. Accept that a small amount of leakage will happen. For a €29 one-time purchase
-   the effort-to-reward for a customer to obtain a foreign card is poor. **Do not
-   over-engineer this.** The realistic annual loss is smaller than a week spent
-   building a fraud system.
-
-### Currency and presentation
-
-- Charge in the **local currency** with locally sensible price points: €29,
-  CHF 32, £25, $34, ₺899, ₹899, AED 129, R$ 89. Never a raw FX conversion —
-  "€28.73" reads as amateur.
-- **Tax-inclusive display in the EU and UK** (required by consumer law),
-  tax-exclusive in the US. Your MoR handles collection; you set the gross.
-- Review price points quarterly against FX; a 20% TRY move will quietly destroy
-  your Turkish margin.
-- Anchor with a struck-through "regular" price only if it was ever real. Fake
-  anchoring is illegal under the EU Omnibus Directive (price must be the lowest
-  charged in the prior 30 days).
-
----
+- **`orders` already stores `currency` and `billing_country`** ([01](01-data-model.md) §1.9).
+  Record them from day one even though you only ever see one value. When the
+  question of a second market comes up, you will have a year of data telling you
+  where people actually tried to buy from.
+- **`price_points` is keyed by SKU and currency**, so adding a second currency
+  later is an insert, not a migration.
+- **Prices are stored in minor units as integers.** Never floats, never a
+  formatted string.
+- **Tax-inclusive display** where consumer law requires it; your merchant of
+  record handles collection, you set the gross. See [05](05-payments.md) §5.2.
+- **A struck-through "was" price must be real** — under the EU Omnibus
+  Directive it has to be the lowest price charged in the previous 30 days.
+  Don't invent anchors.
+- Review the price against costs and conversion quarterly. A one-time €29
+  product has no second chance to make its margin.
 
 ## 4.5 Discounts and promotion structure
 
@@ -186,6 +134,6 @@ Worth doing, in order:
 - Planner referral codes: track `orders.raw_payload.referral` and pay out
   quarterly. Manual at first; automation is premature.
 - **Seasonal discounts are dangerous in this product.** Weddings are booked
-  months ahead; a January sale trains customers to wait and cannibalises the
-  May–September peak. Prefer bundles (invitation + save-the-date + thank-you at
+  months ahead; an off-season sale trains customers to wait and cannibalises the
+  peak. Prefer bundles (invitation + save-the-date + thank-you at
   €79) over percentage-off.
