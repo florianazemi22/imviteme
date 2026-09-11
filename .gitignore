@@ -1,0 +1,13 @@
+/vendor/
+/node_modules/
+/var/
+/public/build/
+/public/bundles/
+.env.local
+.env.*.local
+.php-cs-fixer.cache
+.phpunit.result.cache
+/.idea/
+/.vscode/
+.DS_Store
+/tests/__screenshots__/*.actual.png
