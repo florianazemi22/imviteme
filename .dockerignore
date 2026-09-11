@@ -1,0 +1,13 @@
+.git
+.gitignore
+docs
+node_modules
+**/node_modules
+app/var
+app/vendor
+app/public/build
+tests/__screenshots__
+*.md
+!services/og-render/*.md
+.env.local
+.env.*.local

@@ -1,0 +1,60 @@
+#!/usr/bin/env bash
+# Check that every service in the stack actually answers. Exits non-zero on the
+# first failure so it is usable in CI as well as by hand.
+set -uo pipefail
+
+LANDING_PORT="${LANDING_PORT:-8080}"
+WEB_PORT="${WEB_PORT:-8000}"
+OG_PORT="${OG_PORT:-3000}"
+MAILPIT_UI_PORT="${MAILPIT_UI_PORT:-8025}"
+
+fail=0
+probe() {
+  local label="$1" url="$2" expect="${3:-200}"
+  local code
+  code=$(curl -s -o /dev/null -w '%{http_code}' --max-time 10 "$url" 2>/dev/null)
+  if [ "$code" = "$expect" ]; then
+    printf '  ok    %-22s %s\n' "$label" "$url"
+  else
+    printf '  FAIL  %-22s %s (got HTTP %s, wanted %s)\n' "$label" "$url" "${code:-none}" "$expect"
+    fail=1
+  fi
+}
+
+echo "Smoke-testing the stack:"
+probe "landing"   "http://localhost:${LANDING_PORT}/"
+probe "app"       "http://localhost:${WEB_PORT}/"
+probe "og health" "http://localhost:${OG_PORT}/healthz"
+probe "mailpit"   "http://localhost:${MAILPIT_UI_PORT}/"
+
+# A real render, not just a health ping: this is what catches a missing font
+# or a Chromium that starts but cannot paint.
+echo
+echo "Rendering a test image through the og service:"
+tmp=$(mktemp /tmp/imvite-og-XXXXXX.jpeg)
+http_code=$(curl -s -o "$tmp" -w '%{http_code}' --max-time 30 \
+  -X POST "http://localhost:${OG_PORT}/render" \
+  -H 'content-type: application/json' \
+  --data '{"html":"<!doctype html><meta charset=utf-8><body style=\"margin:0;display:grid;place-items:center;height:630px;background:#FBF7F0;font:600 64px Georgia,serif\"><div><div>Arta &amp; Besnik</div><div style=\"font-size:40px\" lang=ar dir=rtl>أروى ومروان</div><div style=\"font-size:40px\" lang=ur dir=rtl>عائشہ اور بلال</div></div>","width":1200,"height":630}' \
+  2>/dev/null)
+
+if [ "$http_code" = "200" ] && [ -s "$tmp" ]; then
+  bytes=$(wc -c < "$tmp")
+  printf '  ok    render                 %s bytes -> %s\n' "$bytes" "$tmp"
+  # doc 07 §7.1: keep OG images under ~300KB or WhatsApp may drop the preview.
+  if [ "$bytes" -gt 307200 ]; then
+    printf '  WARN  render is over 300KB; WhatsApp may drop the preview\n'
+  fi
+else
+  printf '  FAIL  render                 (HTTP %s)\n' "${http_code:-none}"
+  rm -f "$tmp"
+  fail=1
+fi
+
+echo
+if [ "$fail" -eq 0 ]; then
+  echo "All services healthy."
+else
+  echo "Something is down. Try: docker compose ps, then docker compose logs <service>"
+fi
+exit "$fail"

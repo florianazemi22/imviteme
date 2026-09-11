@@ -1,0 +1,14 @@
+{
+  "name": "@imvite/og-render",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Headless Chromium render service: per-invitation OG images and print-ready PDFs.",
+  "engines": { "node": ">=22" },
+  "scripts": {
+    "start": "node server.mjs"
+  },
+  "dependencies": {
+    "playwright": "1.56.1"
+  }
+}

@@ -8,7 +8,19 @@ Built multi-script and multi-culture from the first migration: per-invitation
 languages including RTL, non-Latin typography that doesn't break, multi-day
 celebrations with per-guest sub-event scoping, and regional pricing.
 
-**Status:** architecture and planning. No application code yet.
+**Status:** architecture and planning. The Symfony application has not been
+scaffolded yet; the repository holds the architecture docs, a pre-launch
+landing page, and a Dockerised development stack ready for the app to land in.
+
+## Running it
+
+```bash
+cp .env.example .env
+make up && make smoke
+```
+
+See **[DEVELOPMENT.md](DEVELOPMENT.md)** for what each service is, why it is
+configured the way it is, and how to scaffold Symfony into `app/`.
 
 ## Start here
 
@@ -27,6 +39,16 @@ the ten decisions everything hangs off, and where each topic lives.
 | [MVP & roadmap](docs/architecture/08-mvp-and-roadmap.md) | Smallest sellable version, explicit cuts, phases |
 | [Risks](docs/architecture/09-risks.md) | What actually kills this |
 | [Open questions](docs/architecture/OPEN-QUESTIONS.md) | What to verify, and how |
+
+## Repository layout
+
+| Path | |
+|---|---|
+| `docs/architecture/` | the plan — data model, themes, i18n, pricing, payments, RSVP, previews, roadmap, risks |
+| `landing/` | pre-launch marketing page: static, no build step, no third-party requests |
+| `app/` | the Symfony application (placeholder stack-check page for now) |
+| `services/og-render/` | Chromium render service: OG images and print-ready PDFs |
+| `docker/`, `compose.yaml` | the development stack |
 
 ## Intended stack
 

@@ -1,0 +1,164 @@
+# Imvite local development stack.
+#
+# The Symfony application does not exist yet — app/ holds a placeholder that
+# reports whether every backing service is reachable. See DEVELOPMENT.md for
+# how to scaffold Symfony into it without fighting this compose file.
+#
+#   landing   http://localhost:8080   static marketing page (landing/)
+#   web       http://localhost:8000   Symfony app (nginx -> php-fpm)
+#   og        http://localhost:3000   OG image + PDF renderer (Playwright)
+#   mailpit   http://localhost:8025   catches all outbound mail
+#   db        localhost:5432          postgres 16
+#   redis     localhost:6379
+
+name: imvite
+
+services:
+
+  # ---------------------------------------------------------------- landing --
+  # Static marketing page. Serves landing/ with the exact security headers the
+  # production host should send, so header mistakes surface locally.
+  landing:
+    image: nginx:1.27-alpine
+    restart: unless-stopped
+    ports:
+      - "${LANDING_PORT:-8080}:80"
+    volumes:
+      - ./landing:/usr/share/nginx/html:ro
+      - ./docker/landing/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./docker/landing/security-headers.inc:/etc/nginx/conf.d/security-headers.inc:ro
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost/"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+      start_period: 5s
+
+  # -------------------------------------------------------------------- web --
+  # nginx in front of php-fpm. Owns no PHP itself; it forwards to `php`.
+  web:
+    image: nginx:1.27-alpine
+    restart: unless-stopped
+    depends_on:
+      php:
+        condition: service_started
+    ports:
+      - "${WEB_PORT:-8000}:80"
+    volumes:
+      - ./app:/app:ro
+      - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost/"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+      start_period: 10s
+
+  # -------------------------------------------------------------------- php --
+  php:
+    build:
+      context: .
+      dockerfile: docker/php/Dockerfile
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      # Symfony reads these once the app exists; the placeholder uses them now.
+      APP_ENV: "${APP_ENV:-dev}"
+      APP_DEBUG: "${APP_DEBUG:-1}"
+      DATABASE_URL: "postgresql://${POSTGRES_USER:-imvite}:${POSTGRES_PASSWORD:-imvite}@db:5432/${POSTGRES_DB:-imvite}?serverVersion=16&charset=utf8"
+      REDIS_URL: "redis://redis:6379"
+      MESSENGER_TRANSPORT_DSN: "redis://redis:6379/messages"
+      MAILER_DSN: "smtp://mailpit:1025"
+      OG_SERVICE_URL: "http://og:3000"
+      PHP_IDE_CONFIG: "serverName=imvite"
+    volumes:
+      - ./app:/app
+      - composer-cache:/root/.composer
+
+  # --------------------------------------------------------------------- db --
+  db:
+    image: postgres:16-bookworm
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: "${POSTGRES_DB:-imvite}"
+      POSTGRES_USER: "${POSTGRES_USER:-imvite}"
+      POSTGRES_PASSWORD: "${POSTGRES_PASSWORD:-imvite}"
+      # Dev only. Speeds up the test suite considerably and the data is disposable.
+      PGDATA: /var/lib/postgresql/data/pgdata
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - db-data:/var/lib/postgresql/data
+      - ./docker/postgres/initdb:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-imvite} -d ${POSTGRES_DB:-imvite}"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+      start_period: 10s
+
+  # ------------------------------------------------------------------ redis --
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    command: ["redis-server", "--save", "", "--appendonly", "no"]
+    ports:
+      - "${REDIS_PORT:-6379}:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  # --------------------------------------------------------------------- og --
+  # Headless Chromium behind a tiny HTTP API: OG images now, print PDFs later.
+  # Fonts for every supported script are baked into the image and asserted at
+  # build time — see docs/architecture/07-link-previews.md.
+  og:
+    build:
+      context: .
+      dockerfile: docker/og/Dockerfile
+    restart: unless-stopped
+    # Chromium needs more than the default 64MB of shared memory or it will
+    # crash on larger pages. This is the usual fix; --disable-dev-shm-usage in
+    # the launch flags is the alternative.
+    shm_size: "1gb"
+    environment:
+      PORT: "3000"
+      NODE_ENV: "${NODE_ENV:-development}"
+      MAX_CONCURRENCY: "2"
+      RENDERS_PER_BROWSER: "200"
+    ports:
+      - "${OG_PORT:-3000}:3000"
+    volumes:
+      - ./services/og-render:/srv/app
+      - og-node-modules:/srv/app/node_modules
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://localhost:3000/healthz').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 10s
+      timeout: 10s
+      retries: 6
+      start_period: 30s
+
+  # ---------------------------------------------------------------- mailpit --
+  # Catches every outbound mail so RSVP notifications never reach a real inbox
+  # from a dev machine.
+  mailpit:
+    image: axllent/mailpit:latest
+    restart: unless-stopped
+    environment:
+      MP_MAX_MESSAGES: "500"
+      MP_SMTP_AUTH_ACCEPT_ANY: "1"
+      MP_SMTP_AUTH_ALLOW_INSECURE: "1"
+    ports:
+      - "${MAILPIT_UI_PORT:-8025}:8025"
+      - "${MAILPIT_SMTP_PORT:-1025}:1025"
+
+volumes:
+  db-data:
+  composer-cache:
+  og-node-modules:
