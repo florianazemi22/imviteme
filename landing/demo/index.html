@@ -1,0 +1,862 @@
+<!doctype html>
+<!--
+  Imvite — demo invitation.
+  This is what a GUEST opens. It deliberately does not use the Imvite marketing
+  brand: a theme carries its own design tokens (see
+  docs/architecture/02-theme-architecture.md), and a wedding invitation in thick
+  neo-brutalist outlines would read as a novelty. This is "Hartley", the
+  classic-serif theme from the landing page gallery.
+
+  Everything is client-side. No backend, no data leaves the page — the RSVP
+  flow is real UI against in-memory state so the interaction can be judged.
+
+  Sections follow the shared vocabulary in docs/architecture/01-data-model.md §1.4:
+    hero · countdown · story · schedule · venue · dress_code · gallery
+    · rsvp · gifts · faq · contacts
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Anna &amp; Luis · 17 July 2027 — an Imvite demo invitation</title>
+<meta name="description" content="A demonstration invitation built with Imvite. Anna and Luis, 17 July 2027, Bath. Not a real wedding.">
+<meta name="robots" content="noindex, nofollow">
+<link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+<meta name="theme-color" content="#FBF9F4">
+
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Imvite">
+<meta property="og:title" content="Anna &amp; Luis · 17 July 2027">
+<meta property="og:description" content="Together with their families. Bath, Saturday 17 July 2027. A demonstration invitation built with Imvite.">
+<meta property="og:locale" content="en_GB">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+
+<style>
+/* ==========================================================================
+   THEME TOKENS — "Hartley"
+   In the product these come from the theme manifest; here they are inline.
+   ========================================================================== */
+:root {
+  color-scheme: light;              /* an invitation has one look, deliberately */
+
+  --ivory:   #FBF9F4;
+  --paper:   #FFFFFF;
+  --sand:    #F3EEE4;
+  --ink:     #2A2521;               /* 13.9:1 on ivory */
+  --muted:   #6B6158;               /* 5.4:1 on ivory */
+  --gold:    #A97F4B;               /* 4.6:1 on ivory — safe for small text */
+  --gold-lt: #D9BE93;
+  --line:    rgba(42, 37, 33, 0.14);
+
+  --font-display: "Cormorant Garamond", "Iowan Old Style", Georgia, serif;
+  --font-body:    Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+
+  --fs-hero:  clamp(3rem, 15vw, 6.5rem);
+  --fs-h2:    clamp(1.75rem, 6vw, 2.6rem);
+  --fs-h3:    clamp(1.15rem, 3.6vw, 1.45rem);
+  --fs-body:  clamp(1rem, 2.7vw, 1.075rem);
+  --fs-small: clamp(0.82rem, 2.2vw, 0.9rem);
+
+  --gutter: clamp(1.25rem, 6vw, 2rem);
+  --band:   clamp(3.5rem, 12vw, 6rem);
+  --measure: 34rem;
+
+  --dur: 500ms;
+  --ease: cubic-bezier(0.22, 0.8, 0.3, 1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root { --dur: 1ms; }
+  *, *::before, *::after {
+    animation-duration: 1ms !important;
+    transition-duration: 1ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+
+body {
+  margin: 0;
+  background: var(--ivory);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: var(--fs-body);
+  line-height: 1.7;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: clip;
+}
+
+h1, h2, h3 { font-family: var(--font-display); font-weight: 400; line-height: 1.1; margin: 0; text-wrap: balance; }
+p { margin: 0; text-wrap: pretty; }
+img, svg { max-width: 100%; display: block; }
+
+:focus-visible { outline: 2px solid var(--gold); outline-offset: 3px; border-radius: 3px; }
+
+.wrap {
+  inline-size: 100%;
+  max-inline-size: var(--measure);
+  margin-inline: auto;
+  padding-inline: var(--gutter);
+}
+.band { padding-block: var(--band); }
+.band--sand { background: var(--sand); }
+.center { text-align: center; }
+
+.eyebrow {
+  font-family: var(--font-body);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.muted { color: var(--muted); }
+.small { font-size: var(--fs-small); }
+
+h2 { font-size: var(--fs-h2); }
+h3 { font-size: var(--fs-h3); }
+
+/* ornamental rule ---------------------------------------------------------- */
+.rule { display: flex; align-items: center; justify-content: center; gap: 0.75rem; color: var(--gold-lt); }
+.rule::before, .rule::after { content: ""; block-size: 1px; inline-size: clamp(2rem, 12vw, 4rem); background: currentColor; }
+.rule__dot { inline-size: 6px; block-size: 6px; background: var(--gold); transform: rotate(45deg); }
+
+/* entrance ----------------------------------------------------------------- */
+.rise { opacity: 0; transform: translateY(12px); transition: opacity var(--dur) var(--ease), transform var(--dur) var(--ease); }
+.rise.is-in { opacity: 1; transform: none; }
+@media (prefers-reduced-motion: reduce) { .rise { opacity: 1; transform: none; } }
+
+/* ==========================================================================
+   DEMO BANNER — this is a fictional wedding on a public URL. Say so.
+   ========================================================================== */
+.demo-bar {
+  background: var(--ink);
+  color: var(--ivory);
+  font-size: 0.78rem;
+  letter-spacing: 0.02em;
+  text-align: center;
+  padding: 0.6rem var(--gutter);
+}
+.demo-bar a { color: var(--gold-lt); text-underline-offset: 3px; }
+.demo-bar strong { font-weight: 600; }
+
+/* ==========================================================================
+   HERO
+   ========================================================================== */
+.hero {
+  min-block-size: 88svh;
+  display: grid;
+  align-content: center;
+  justify-items: center;
+  gap: 1.5rem;
+  text-align: center;
+  padding: clamp(3rem, 10vh, 5rem) var(--gutter);
+  background: var(--paper);
+  border-block-end: 1px solid var(--line);
+}
+.hero__names {
+  font-size: var(--fs-hero);
+  font-weight: 300;
+  line-height: 0.95;
+  letter-spacing: -0.01em;
+}
+.hero__names .amp { font-style: italic; color: var(--gold); display: block; font-size: 0.52em; margin-block: 0.12em; }
+.hero__meta { font-family: var(--font-display); font-size: clamp(1.05rem, 3.4vw, 1.35rem); letter-spacing: 0.04em; }
+.hero__greet { max-inline-size: 26rem; }
+.scroll-cue {
+  margin-block-start: 1rem;
+  display: inline-grid;
+  justify-items: center;
+  gap: 0.4rem;
+  color: var(--muted);
+  font-size: 0.7rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  text-decoration: none;
+}
+.scroll-cue svg { animation: nudge 2.4s var(--ease) infinite; }
+@keyframes nudge { 0%,100% { transform: translateY(0); } 50% { transform: translateY(5px); } }
+@media (prefers-reduced-motion: reduce) { .scroll-cue svg { animation: none; } }
+
+/* ==========================================================================
+   COUNTDOWN
+   ========================================================================== */
+.countdown { display: flex; justify-content: center; gap: clamp(0.75rem, 4vw, 2rem); margin-block-start: 1.75rem; }
+.countdown div { min-inline-size: 3.4rem; }
+.countdown b {
+  display: block;
+  font-family: var(--font-display);
+  font-size: clamp(2rem, 8vw, 3rem);
+  font-weight: 300;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+.countdown span { font-size: 0.68rem; letter-spacing: 0.16em; text-transform: uppercase; color: var(--muted); }
+
+/* ==========================================================================
+   SCHEDULE
+   ========================================================================== */
+.events { display: grid; gap: 1rem; margin-block-start: 2.25rem; }
+.event {
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: 3px;
+  padding: 1.4rem 1.35rem;
+  display: grid;
+  gap: 0.45rem;
+}
+.event--muted { background: transparent; border-style: dashed; opacity: 0.72; }
+.event__when { font-size: 0.72rem; letter-spacing: 0.16em; text-transform: uppercase; color: var(--gold); font-weight: 600; }
+.event__where { color: var(--muted); font-size: var(--fs-small); }
+.event__note { font-size: var(--fs-small); color: var(--muted); font-style: italic; }
+.event__tag {
+  justify-self: start;
+  font-size: 0.68rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  border: 1px solid var(--gold-lt);
+  color: var(--gold);
+  border-radius: 999px;
+  padding: 0.15rem 0.6rem;
+  margin-block-start: 0.3rem;
+}
+
+/* ==========================================================================
+   GALLERY — CSS placeholders. No stock imagery: see
+   docs/architecture/09-risks.md §9.5 on marketplace asset licensing.
+   ========================================================================== */
+.gallery { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.6rem; margin-block-start: 2rem; }
+.gallery div {
+  aspect-ratio: 3 / 4;
+  border: 1px solid var(--line);
+  background:
+    repeating-linear-gradient(45deg, transparent 0 12px, rgba(42,37,33,.045) 12px 24px),
+    var(--sand);
+}
+.gallery div:first-child { grid-column: span 2; aspect-ratio: 3 / 2; }
+
+/* ==========================================================================
+   RSVP
+   ========================================================================== */
+.rsvp-card {
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: 3px;
+  padding: clamp(1.4rem, 5vw, 2.25rem);
+  margin-block-start: 2rem;
+}
+.step { display: none; }
+.step.is-active { display: block; animation: fade var(--dur) var(--ease); }
+@keyframes fade { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+
+.field { display: grid; gap: 0.45rem; margin-block-start: 1.25rem; }
+.field > label, .legend { font-size: var(--fs-small); font-weight: 600; }
+fieldset { border: 0; padding: 0; margin: 1.25rem 0 0; }
+.legend { display: block; margin-block-end: 0.6rem; }
+
+input[type="text"], textarea, select {
+  font: inherit;
+  font-size: var(--fs-body);
+  color: var(--ink);
+  background: var(--ivory);
+  border: 1px solid var(--line);
+  border-radius: 3px;
+  padding: 0.7rem 0.8rem;
+  inline-size: 100%;
+}
+textarea { min-block-size: 5.5rem; resize: vertical; }
+
+.choice { display: grid; gap: 0.55rem; }
+.choice label {
+  display: grid;
+  grid-template-columns: 1.15rem minmax(0, 1fr);
+  gap: 0.75rem;
+  align-items: start;
+  padding: 0.8rem 0.9rem;
+  border: 1px solid var(--line);
+  border-radius: 3px;
+  cursor: pointer;
+  font-size: var(--fs-small);
+  background: var(--ivory);
+  transition: border-color var(--dur) var(--ease), background-color var(--dur) var(--ease);
+}
+.choice label:hover { border-color: var(--gold-lt); }
+.choice input { margin: 0.32rem 0 0; accent-color: var(--gold); }
+.choice input:checked ~ span { color: var(--ink); }
+.choice label:has(input:checked) { border-color: var(--gold); background: var(--paper); }
+.choice span b { display: block; font-weight: 600; }
+.choice span em { font-style: normal; color: var(--muted); }
+
+.stepper { display: flex; align-items: center; gap: 1rem; }
+.stepper button {
+  inline-size: 2.75rem; block-size: 2.75rem;
+  font: inherit; font-size: 1.3rem; line-height: 1;
+  border: 1px solid var(--line); background: var(--ivory); color: var(--ink);
+  border-radius: 50%; cursor: pointer;
+}
+.stepper button:hover:not(:disabled) { border-color: var(--gold); }
+.stepper button:disabled { opacity: 0.35; cursor: not-allowed; }
+.stepper output { font-family: var(--font-display); font-size: 2rem; min-inline-size: 2ch; text-align: center; font-variant-numeric: tabular-nums; }
+
+.btn {
+  font: inherit;
+  font-size: var(--fs-small);
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 0.95rem 1.6rem;
+  border: 1px solid var(--ink);
+  background: var(--ink);
+  color: var(--ivory);
+  border-radius: 2px;
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  transition: background-color var(--dur) var(--ease), color var(--dur) var(--ease);
+}
+.btn:hover { background: var(--gold); border-color: var(--gold); color: var(--paper); }
+.btn--ghost { background: transparent; color: var(--ink); }
+.btn--ghost:hover { background: var(--ink); color: var(--ivory); border-color: var(--ink); }
+.btn--block { inline-size: 100%; }
+
+.btn-row { display: grid; gap: 0.7rem; margin-block-start: 1.75rem; }
+@media (min-width: 26rem) { .btn-row--two { grid-template-columns: 1fr 1fr; } }
+
+.back {
+  background: none; border: 0; padding: 0.5rem 0; margin-block-start: 1rem;
+  font: inherit; font-size: var(--fs-small); color: var(--muted);
+  cursor: pointer; text-decoration: underline; text-underline-offset: 3px;
+}
+.back:hover { color: var(--ink); }
+
+.summary { display: grid; gap: 0.5rem; margin-block: 1.5rem; text-align: start; }
+.summary div { display: flex; justify-content: space-between; gap: 1rem; font-size: var(--fs-small); border-block-end: 1px solid var(--line); padding-block-end: 0.5rem; }
+.summary dt { color: var(--muted); }
+.summary dd { margin: 0; font-weight: 600; text-align: end; }
+
+.progress { display: flex; gap: 0.35rem; justify-content: center; margin-block-end: 1.5rem; }
+.progress i { inline-size: 1.6rem; block-size: 2px; background: var(--line); border-radius: 999px; }
+.progress i.done { background: var(--gold); }
+
+/* ==========================================================================
+   FAQ / CONTACTS / FOOTER
+   ========================================================================== */
+.faq { display: grid; gap: 0.25rem; margin-block-start: 2rem; text-align: start; }
+.faq details { border-block-end: 1px solid var(--line); }
+.faq summary {
+  cursor: pointer; list-style: none;
+  padding: 1rem 0; font-weight: 600; font-size: var(--fs-small);
+  display: flex; justify-content: space-between; gap: 1rem; align-items: center;
+}
+.faq summary::-webkit-details-marker { display: none; }
+.faq summary::after { content: "+"; color: var(--gold); font-size: 1.2rem; line-height: 1; }
+.faq details[open] summary::after { content: "–"; }
+.faq p { padding-block-end: 1rem; color: var(--muted); font-size: var(--fs-small); }
+
+.contacts { display: grid; gap: 0.6rem; margin-block-start: 1.75rem; }
+.contacts a {
+  display: flex; justify-content: space-between; align-items: center; gap: 1rem;
+  padding: 0.85rem 1rem;
+  border: 1px solid var(--line); border-radius: 3px;
+  color: var(--ink); text-decoration: none; font-size: var(--fs-small);
+  background: var(--paper);
+}
+.contacts a:hover { border-color: var(--gold); }
+.contacts span { color: var(--muted); }
+
+.foot { padding-block: 3rem; text-align: center; border-block-start: 1px solid var(--line); }
+.foot__mark {
+  display: inline-flex; align-items: center; gap: 0.5rem;
+  color: var(--muted); font-size: var(--fs-small); text-decoration: none;
+}
+.foot__mark:hover { color: var(--ink); }
+.foot__mark b { color: var(--ink); font-weight: 600; }
+
+.sr {
+  position: absolute; inline-size: 1px; block-size: 1px;
+  overflow: hidden; clip-path: inset(50%); white-space: nowrap;
+}
+
+/* The hidden attribute only sets display:none in the UA sheet, so any author
+   display rule beats it — .btn is inline-flex and would stay visible. */
+[hidden] { display: none !important; }
+</style>
+</head>
+<body>
+
+<p class="demo-bar">
+  <strong>Demo invitation.</strong> Anna &amp; Luis are not real and nothing you
+  submit is stored. <a href="../">See how Imvite works →</a>
+</p>
+
+<!-- ===================== HERO ===================== -->
+<header class="hero">
+  <p class="rule" aria-hidden="true"><span class="rule__dot"></span></p>
+  <p class="eyebrow">Together with their families</p>
+  <h1 class="hero__names">Anna<span class="amp">&amp;</span>Luis</h1>
+  <p class="hero__meta">Saturday, 17 July 2027 · Bath</p>
+  <p class="hero__greet muted small">
+    Dear <strong>the Hartley family</strong> — we would be so glad to have you
+    with us.
+  </p>
+  <a class="scroll-cue" href="#schedule">
+    The details
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M12 5v14M6 13l6 6 6-6"/></svg>
+  </a>
+</header>
+
+<main>
+
+  <!-- ===================== COUNTDOWN ===================== -->
+  <section class="band center">
+    <div class="wrap rise">
+      <p class="eyebrow">The wait</p>
+      <div class="countdown" id="countdown">
+        <div><b data-cd="days">—</b><span>Days</span></div>
+        <div><b data-cd="hours">—</b><span>Hours</span></div>
+        <div><b data-cd="minutes">—</b><span>Minutes</span></div>
+        <div><b data-cd="seconds">—</b><span>Seconds</span></div>
+      </div>
+      <p class="sr" id="cd-sr" aria-live="off"></p>
+    </div>
+  </section>
+
+  <!-- ===================== STORY ===================== -->
+  <section class="band band--sand center">
+    <div class="wrap rise">
+      <p class="rule" aria-hidden="true"><span class="rule__dot"></span></p>
+      <h2 style="margin-block: 1.5rem 1.25rem;">How we got here</h2>
+      <p class="muted">
+        We met in a queue for coffee that neither of us really wanted, on a
+        Tuesday in February, and talked for so long that both cups went cold.
+        Nine years, four flats and one extremely opinionated cat later, we would
+        like you to come and watch us make it official.
+      </p>
+    </div>
+  </section>
+
+  <!-- ===================== SCHEDULE ===================== -->
+  <section class="band" id="schedule">
+    <div class="wrap center rise">
+      <p class="eyebrow">The weekend</p>
+      <h2 style="margin-block: 1rem 0.75rem;">Three days, and you are invited to all of them</h2>
+      <p class="muted small">All times are local to Bath.</p>
+
+      <div class="events" style="text-align: start;">
+        <article class="event">
+          <p class="event__when">Thursday 15 July · 7:00 pm</p>
+          <h3>Welcome dinner</h3>
+          <p class="event__where">The Lamb &amp; Flag, 14 Chapel Row</p>
+          <p class="event__note">For everyone who has travelled. Come as you are.</p>
+        </article>
+
+        <article class="event">
+          <p class="event__when">Saturday 17 July · 2:00 pm</p>
+          <h3>The ceremony</h3>
+          <p class="event__where">Widcombe Chapel, Church Street</p>
+          <p class="event__note">Please be seated by 1:45 pm.</p>
+        </article>
+
+        <article class="event">
+          <p class="event__when">Saturday 17 July · 5:00 pm</p>
+          <h3>Dinner &amp; dancing</h3>
+          <p class="event__where">The Old Barn, Monkton Farleigh</p>
+          <p class="event__note">Carriages at one in the morning.</p>
+        </article>
+
+        <article class="event event--muted">
+          <p class="event__when">Sunday 18 July · 11:00 am</p>
+          <h3>Recovery brunch</h3>
+          <p class="event__where">The Old Barn</p>
+          <p class="event__note">Optional, and no one will count who appears.</p>
+          <p class="event__tag">Not in your invitation</p>
+        </article>
+      </div>
+
+      <p class="small muted" style="margin-block-start: 1.25rem;">
+        Each household sees only the days they are invited to — the greyed one
+        above is shown here to demonstrate it.
+      </p>
+    </div>
+  </section>
+
+  <!-- ===================== VENUE & DRESS ===================== -->
+  <section class="band band--sand center">
+    <div class="wrap rise">
+      <p class="eyebrow">Getting there</p>
+      <h2 style="margin-block: 1rem 1.25rem;">The Old Barn</h2>
+      <p class="muted">
+        Monkton Farleigh, Bath BA15 2QH. There is parking for forty cars, and a
+        minibus will run from the chapel after the ceremony and back into Bath
+        at midnight and at one.
+      </p>
+      <p style="margin-block-start: 1.75rem;">
+        <a class="btn btn--ghost" href="https://www.openstreetmap.org/search?query=Monkton%20Farleigh%20Bath" target="_blank" rel="noopener">Open in maps</a>
+      </p>
+
+      <p class="rule" aria-hidden="true" style="margin-block: 3rem 1.5rem;"><span class="rule__dot"></span></p>
+
+      <p class="eyebrow">What to wear</p>
+      <h3 style="margin-block: 0.75rem 0.75rem;">Summer formal</h3>
+      <p class="muted small">
+        Suits and summer dresses. The ceremony and the first drinks are on grass,
+        so heels may not thank you.
+      </p>
+    </div>
+  </section>
+
+  <!-- ===================== GALLERY ===================== -->
+  <section class="band center">
+    <div class="wrap rise">
+      <p class="eyebrow">Us, lately</p>
+      <div class="gallery" role="group" aria-label="Photographs of the couple">
+        <div role="img" aria-label="Placeholder for the couple's photograph"></div>
+        <div role="img" aria-label="Placeholder for the couple's photograph"></div>
+        <div role="img" aria-label="Placeholder for the couple's photograph"></div>
+      </div>
+      <p class="small muted" style="margin-block-start: 1rem;">
+        Placeholders — a real invitation carries the couple's own photographs.
+      </p>
+    </div>
+  </section>
+
+  <!-- ===================== RSVP ===================== -->
+  <section class="band band--sand" id="rsvp">
+    <div class="wrap center rise">
+      <p class="eyebrow">Will you join us?</p>
+      <h2 style="margin-block: 1rem 0.75rem;">Please reply by 1 May 2027</h2>
+      <p class="muted small">This invitation covers <strong>4 guests</strong>.</p>
+
+      <div class="rsvp-card">
+        <p class="progress" id="progress" aria-hidden="true"></p>
+        <p class="sr" id="step-live" aria-live="polite"></p>
+
+        <!-- step 1 ------------------------------------------------------- -->
+        <div class="step is-active" id="s1" data-step="1" tabindex="-1">
+          <h3 style="font-size: var(--fs-h3);">The Hartley family</h3>
+          <p class="muted small" style="margin-block-start: 0.5rem;">
+            Anna and Luis would be delighted to see you.
+          </p>
+          <div class="btn-row btn-row--two">
+            <button class="btn" type="button" data-attend="yes">Joyfully accept</button>
+            <button class="btn btn--ghost" type="button" data-attend="no">Regretfully decline</button>
+          </div>
+        </div>
+
+        <!-- step 2 ------------------------------------------------------- -->
+        <div class="step" id="s2" data-step="2" tabindex="-1">
+          <h3 style="font-size: var(--fs-h3);">Wonderful. How many of you?</h3>
+          <p class="muted small" style="margin-block-start: 0.5rem;">Up to 4, including children.</p>
+          <div class="stepper" style="justify-content: center; margin-block-start: 1.5rem;">
+            <button type="button" id="minus" aria-label="One fewer guest">−</button>
+            <output id="party" for="minus plus" aria-live="polite">2</output>
+            <button type="button" id="plus" aria-label="One more guest">+</button>
+          </div>
+          <div class="field" style="text-align: start;">
+            <label for="names">Who is coming? <span class="muted">(optional)</span></label>
+            <input type="text" id="names" placeholder="Jo and Sam Hartley" autocomplete="off">
+          </div>
+          <div class="btn-row"><button class="btn btn--block" type="button" data-next="3">Continue</button></div>
+          <button class="back" type="button" data-back="1">Back</button>
+        </div>
+
+        <!-- step 3 ------------------------------------------------------- -->
+        <div class="step" id="s3" data-step="3" tabindex="-1">
+          <h3 style="font-size: var(--fs-h3);">Which days can you make?</h3>
+          <fieldset>
+            <span class="legend sr">Days you will attend</span>
+            <div class="choice">
+              <label><input type="checkbox" name="day" value="Welcome dinner" checked>
+                <span><b>Welcome dinner</b><em>Thursday 15 July, 7:00 pm</em></span></label>
+              <label><input type="checkbox" name="day" value="The ceremony" checked>
+                <span><b>The ceremony</b><em>Saturday 17 July, 2:00 pm</em></span></label>
+              <label><input type="checkbox" name="day" value="Dinner &amp; dancing" checked>
+                <span><b>Dinner &amp; dancing</b><em>Saturday 17 July, 5:00 pm</em></span></label>
+            </div>
+          </fieldset>
+          <div class="btn-row"><button class="btn btn--block" type="button" data-next="4">Continue</button></div>
+          <button class="back" type="button" data-back="2">Back</button>
+        </div>
+
+        <!-- step 4 ------------------------------------------------------- -->
+        <div class="step" id="s4" data-step="4" tabindex="-1">
+          <h3 style="font-size: var(--fs-h3);">Anything we should know?</h3>
+          <div class="field" style="text-align: start;">
+            <label for="meal">Meal preference</label>
+            <select id="meal">
+              <option>No preference</option>
+              <option>Vegetarian</option>
+              <option>Vegan</option>
+              <option>Pescatarian</option>
+              <option>Gluten free</option>
+            </select>
+          </div>
+          <div class="field" style="text-align: start;">
+            <label for="note">Allergies, access needs, or a message <span class="muted">(optional)</span></label>
+            <textarea id="note" placeholder="Anything at all."></textarea>
+          </div>
+          <div class="btn-row"><button class="btn btn--block" type="button" data-next="5">Send our reply</button></div>
+          <button class="back" type="button" data-back="3">Back</button>
+        </div>
+
+        <!-- step 5 (decline) --------------------------------------------- -->
+        <div class="step" id="s-no" data-step="no" tabindex="-1">
+          <h3 style="font-size: var(--fs-h3);">We will miss you</h3>
+          <div class="field" style="text-align: start;">
+            <label for="note-no">Leave a message for Anna and Luis <span class="muted">(optional)</span></label>
+            <textarea id="note-no" placeholder="Thinking of you both on the day."></textarea>
+          </div>
+          <div class="btn-row"><button class="btn btn--block" type="button" data-next="5">Send our reply</button></div>
+          <button class="back" type="button" data-back="1">Back</button>
+        </div>
+
+        <!-- confirmation -------------------------------------------------- -->
+        <div class="step" id="s5" data-step="5" tabindex="-1">
+          <p class="rule" aria-hidden="true"><span class="rule__dot"></span></p>
+          <h3 style="font-size: var(--fs-h2); font-family: var(--font-display); margin-block: 1.25rem 0.5rem;" id="done-title">Thank you</h3>
+          <p class="muted small" id="done-sub">Your reply is with Anna and Luis.</p>
+
+          <dl class="summary" id="summary"></dl>
+
+          <div class="btn-row btn-row--two">
+            <button class="btn" type="button" id="ics">Add to calendar</button>
+            <button class="btn btn--ghost" type="button" data-back="1">Change our reply</button>
+          </div>
+          <p class="small muted" style="margin-block-start: 1.25rem;">
+            In the real product this lands in the hosts' dashboard immediately.
+            Here it stays in your browser.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== GIFTS ===================== -->
+  <section class="band center">
+    <div class="wrap rise">
+      <p class="eyebrow">Gifts</p>
+      <h2 style="margin-block: 1rem 1.25rem;">Your presence, honestly</h2>
+      <p class="muted">
+        You travelling to Bath is the gift. If you would like to do something
+        anyway, we are putting a little aside towards a long walk in Japan.
+      </p>
+    </div>
+  </section>
+
+  <!-- ===================== FAQ ===================== -->
+  <section class="band band--sand">
+    <div class="wrap center rise">
+      <p class="eyebrow">Questions</p>
+      <h2 style="margin-block: 1rem 0;">Things people have asked</h2>
+
+      <div class="faq">
+        <details>
+          <summary>Can I bring my children?</summary>
+          <p>Yes — count them in your number above. There is a room with sofas,
+          films and someone sensible in charge from eight o'clock.</p>
+        </details>
+        <details>
+          <summary>Where should we stay?</summary>
+          <p>We have held rooms at the Bridgewater in Bath until 1 June under
+          "Anna &amp; Luis". Anywhere central is a fifteen-minute taxi.</p>
+        </details>
+        <details>
+          <summary>Is there parking at the barn?</summary>
+          <p>Forty spaces, and you are very welcome to leave a car overnight and
+          collect it the next morning.</p>
+        </details>
+        <details>
+          <summary>What if our plans change?</summary>
+          <p>Open this link again and change your reply. It updates straight
+          away, right up to 1 May.</p>
+        </details>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== CONTACTS ===================== -->
+  <section class="band center">
+    <div class="wrap rise">
+      <p class="eyebrow">Any trouble</p>
+      <h2 style="margin-block: 1rem 0;">Ask someone</h2>
+      <div class="contacts">
+        <a href="#contacts"><span>Anna</span> <strong>07700 900123</strong></a>
+        <a href="#contacts"><span>Luis</span> <strong>07700 900456</strong></a>
+        <a href="#contacts"><span>Priya, on the day</span> <strong>07700 900789</strong></a>
+      </div>
+      <p class="small muted" style="margin-block-start: 1rem;">Demo numbers — these do not dial.</p>
+    </div>
+  </section>
+</main>
+
+<footer class="foot">
+  <div class="wrap">
+    <a class="foot__mark" href="../">Made with <b>Imvite</b></a>
+  </div>
+</footer>
+
+<script>
+(function () {
+  'use strict';
+  var reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  /* ---------- entrance ---------- */
+  var risers = document.querySelectorAll('.rise');
+  if (reduced || !('IntersectionObserver' in window)) {
+    risers.forEach(function (el) { el.classList.add('is-in'); });
+  } else {
+    var io = new IntersectionObserver(function (es) {
+      es.forEach(function (e) {
+        if (!e.isIntersecting) return;
+        e.target.classList.add('is-in');
+        io.unobserve(e.target);
+      });
+    }, { rootMargin: '0px 0px -6% 0px', threshold: 0.05 });
+    risers.forEach(function (el) { io.observe(el); });
+  }
+
+  /* ---------- countdown ---------- */
+  var TARGET = new Date('2027-07-17T14:00:00+01:00');
+  var cd = {
+    days: document.querySelector('[data-cd="days"]'),
+    hours: document.querySelector('[data-cd="hours"]'),
+    minutes: document.querySelector('[data-cd="minutes"]'),
+    seconds: document.querySelector('[data-cd="seconds"]')
+  };
+  function pad(n) { return String(n).padStart(2, '0'); }
+  function tick() {
+    var ms = TARGET - Date.now();
+    if (ms < 0) ms = 0;
+    var s = Math.floor(ms / 1000);
+    cd.days.textContent = Math.floor(s / 86400);
+    cd.hours.textContent = pad(Math.floor(s % 86400 / 3600));
+    cd.minutes.textContent = pad(Math.floor(s % 3600 / 60));
+    cd.seconds.textContent = pad(s % 60);
+  }
+  if (cd.days) { tick(); setInterval(tick, 1000); }
+
+  /* ---------- rsvp ---------- */
+  var state = { attending: null, party: 2, names: '', days: [], meal: '', note: '' };
+  var steps = document.querySelectorAll('.step');
+  var live = document.getElementById('step-live');
+  var progress = document.getElementById('progress');
+
+  function paintProgress(n) {
+    if (!progress) return;
+    progress.innerHTML = '';
+    for (var i = 1; i <= 4; i++) {
+      var bar = document.createElement('i');
+      if (i <= n) bar.className = 'done';
+      progress.appendChild(bar);
+    }
+    progress.style.visibility = (n >= 1 && n <= 4) ? 'visible' : 'hidden';
+  }
+
+  function show(id) {
+    steps.forEach(function (s) { s.classList.toggle('is-active', s.dataset.step === String(id)); });
+    var el = document.querySelector('.step[data-step="' + id + '"]');
+    if (el) {
+      el.focus({ preventScroll: true });
+      var h = el.querySelector('h3');
+      if (live && h) live.textContent = h.textContent;
+    }
+    paintProgress(Number(id) || 0);
+  }
+
+  document.querySelectorAll('[data-attend]').forEach(function (b) {
+    b.addEventListener('click', function () {
+      state.attending = b.dataset.attend;
+      show(state.attending === 'yes' ? 2 : 'no');
+    });
+  });
+  document.querySelectorAll('[data-next]').forEach(function (b) {
+    b.addEventListener('click', function () {
+      var to = b.dataset.next;
+      if (to === '5') { collect(); render(); }
+      show(to);
+    });
+  });
+  document.querySelectorAll('[data-back]').forEach(function (b) {
+    b.addEventListener('click', function () { show(b.dataset.back); });
+  });
+
+  var party = document.getElementById('party');
+  function setParty(n) {
+    state.party = Math.min(4, Math.max(1, n));
+    party.textContent = state.party;
+    document.getElementById('minus').disabled = state.party <= 1;
+    document.getElementById('plus').disabled = state.party >= 4;
+  }
+  document.getElementById('minus').addEventListener('click', function () { setParty(state.party - 1); });
+  document.getElementById('plus').addEventListener('click', function () { setParty(state.party + 1); });
+  setParty(2);
+
+  function collect() {
+    state.names = (document.getElementById('names').value || '').trim();
+    state.days = Array.prototype.slice.call(document.querySelectorAll('input[name="day"]:checked'))
+      .map(function (i) { return i.value.replace('&amp;', '&'); });
+    state.meal = document.getElementById('meal').value;
+    state.note = (document.getElementById(state.attending === 'yes' ? 'note' : 'note-no').value || '').trim();
+  }
+
+  function row(dl, k, v) {
+    var d = document.createElement('div');
+    var dt = document.createElement('dt'); dt.textContent = k;
+    var dd = document.createElement('dd'); dd.textContent = v;
+    d.appendChild(dt); d.appendChild(dd); dl.appendChild(d);
+  }
+
+  function render() {
+    var dl = document.getElementById('summary');
+    dl.innerHTML = '';
+    document.getElementById('done-title').textContent = state.attending === 'yes' ? 'Thank you' : 'We will miss you';
+    document.getElementById('done-sub').textContent = state.attending === 'yes'
+      ? 'Your reply is with Anna and Luis.'
+      : 'They will be sorry not to see you.';
+
+    row(dl, 'Reply', state.attending === 'yes' ? 'Joyfully accepting' : 'Regretfully declining');
+    if (state.attending === 'yes') {
+      row(dl, 'Guests', String(state.party));
+      if (state.names) row(dl, 'Names', state.names);
+      row(dl, 'Days', state.days.length ? state.days.join(', ') : 'None selected');
+      if (state.meal && state.meal !== 'No preference') row(dl, 'Meal', state.meal);
+    }
+    if (state.note) row(dl, 'Message', state.note);
+    document.getElementById('ics').hidden = state.attending !== 'yes';
+  }
+
+  /* ---------- add to calendar ---------- */
+  document.getElementById('ics').addEventListener('click', function () {
+    var ics = [
+      'BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//Imvite//Demo//EN',
+      'BEGIN:VEVENT',
+      'UID:demo-anna-luis@imvite.com',
+      'DTSTAMP:20260912T000000Z',
+      'DTSTART:20270717T130000Z',
+      'DTEND:20270717T230000Z',
+      'SUMMARY:Anna & Luis are getting married',
+      'LOCATION:Widcombe Chapel, Bath',
+      'DESCRIPTION:Ceremony at 2pm, dinner and dancing from 5pm.',
+      'END:VEVENT', 'END:VCALENDAR'
+    ].join('\r\n');
+    var url = URL.createObjectURL(new Blob([ics], { type: 'text/calendar' }));
+    var a = document.createElement('a');
+    a.href = url; a.download = 'anna-and-luis.ics';
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
+  });
+
+  paintProgress(1);
+})();
+</script>
+</body>
+</html>
