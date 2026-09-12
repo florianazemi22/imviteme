@@ -1,9 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" role="img" aria-label="Imvite">
-  <!-- Authored for Imvite. No third-party or licensed artwork. -->
-  <rect width="32" height="32" rx="7" fill="#9d4128"/>
-  <g fill="none" stroke="#fbf7f2" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
-    <path d="M16 5.5c3.4 3.8 5.9 6.8 5.9 10.5A5.9 5.9 0 0 1 16 21.9a5.9 5.9 0 0 1-5.9-5.9c0-3.7 2.5-6.7 5.9-10.5Z"/>
-    <path d="M16 21.9v4.6M12.4 25h7.2"/>
-  </g>
-  <circle cx="16" cy="14.6" r="1.8" fill="#fbf7f2"/>
+  <rect x="1.5" y="1.5" width="29" height="29" rx="9" fill="#D6336C" stroke="#14213D" stroke-width="3"/>
+  <path d="M16 12.6v9.2" stroke="#FBF7F0" stroke-width="4" stroke-linecap="round"/>
+  <circle cx="16" cy="9.4" r="2.2" fill="#FBF7F0"/>
 </svg>
