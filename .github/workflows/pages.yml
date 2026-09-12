@@ -1,8 +1,15 @@
 # Publishes landing/ to GitHub Pages.
 #
-# configure-pages runs with enablement: true, so the first successful run turns
-# Pages on by itself — no manual toggle in Settings, provided the workflow has
-# the `pages: write` permission below.
+# ONE-TIME MANUAL STEP, required before this can succeed:
+#   Settings -> Pages -> Build and deployment -> Source: "GitHub Actions"
+#
+# It cannot be automated from here. Creating a Pages site is an admin-level
+# operation and the workflow's GITHUB_TOKEN is refused with "Resource not
+# accessible by integration", whatever permissions the job requests. Running
+# configure-pages with `enablement: true` fails for the same reason.
+#
+# Once the source is set to GitHub Actions, every push that touches landing/
+# redeploys the site automatically.
 #
 # The branch filter names the repository's current default branch explicitly.
 # Pages will only deploy from the default branch, so if this repo ever gains a
@@ -41,8 +48,6 @@ jobs:
 
       - name: Configure Pages
         uses: actions/configure-pages@v5
-        with:
-          enablement: true
 
       - name: Upload landing/ as the site
         uses: actions/upload-pages-artifact@v3
