@@ -413,8 +413,11 @@ img, svg { max-width: 100%; display: block; }
 .deco > * { position: absolute; }
 
 .deco__disc-a { inline-size: clamp(12rem, 34vw, 24rem); inset-block-start: -14%; inset-inline-end: -10%; transform: rotate(14deg); }
-.deco__disc-b { inline-size: clamp(9rem, 26vw, 17rem); inset-block-end: -18%; inset-inline-start: -12%; transform: rotate(-18deg); }
-.deco__confetti { inline-size: clamp(7rem, 18vw, 11rem); inset-block-start: 6%; inset-inline-start: -4%; transform: rotate(-8deg); opacity: .9; }
+.deco__disc-b { inline-size: clamp(8rem, 14vw, 11rem); inset-block-end: -5rem; inset-inline-start: -4rem; transform: rotate(-18deg); }
+/* Sized and raised so its rotated box clears the badge at every desktop
+   width — the text column starts close to the left edge, so the left-hand
+   shapes have to be vertically clear rather than horizontally clear. */
+.deco__confetti { inline-size: clamp(6.5rem, 10vw, 8rem); inset-block-start: 0; inset-inline-start: -5.5rem; transform: rotate(-8deg); }
 
 /* Below the desktop breakpoint the shapes get their own band at the foot of
    the hero — the extra padding-block-end above reserves it — rather than
@@ -442,11 +445,10 @@ img, svg { max-width: 100%; display: block; }
 .step__n {
   inline-size: 3.2rem; block-size: 3.2rem;
   display: grid; place-items: center;
-  font-family: var(--font-display);
-  font-size: 1.5rem; font-weight: 700;
   border: var(--border-thin);
   border-radius: 12px;
 }
+.step__n svg { inline-size: 1.5rem; block-size: 1.5rem; }
 .step:nth-child(1) .step__n { background: var(--indigo); color: #fff; }
 .step:nth-child(2) .step__n { background: var(--ochre); color: var(--ink); }
 .step:nth-child(3) .step__n { background: var(--magenta); color: #fff; }
@@ -681,25 +683,42 @@ img, svg { max-width: 100%; display: block; }
     <!-- Decorative vector, bleeding off the edges. Authored here: no stock
          imagery, no licence to track, nothing to attribute. -->
     <div class="deco" aria-hidden="true">
+      <!-- Open envelope with the invitation card behind it. -->
       <svg class="deco__disc-a" viewBox="0 0 200 200" fill="none">
         <circle cx="100" cy="100" r="92" fill="var(--tint-magenta)" stroke="var(--ink)" stroke-width="5"/>
-        <rect x="46" y="66" width="108" height="74" rx="8" fill="var(--paper)" stroke="var(--ink)" stroke-width="5"/>
-        <path d="M46 74l54 40 54-40" stroke="var(--ink)" stroke-width="5" stroke-linejoin="round" fill="none"/>
-        <circle cx="100" cy="100" r="92" stroke="var(--magenta)" stroke-width="2" stroke-dasharray="10 12" fill="none"/>
+        <circle cx="100" cy="100" r="92" stroke="var(--magenta)" stroke-width="2" stroke-dasharray="9 13" fill="none"/>
+        <rect x="62" y="36" width="76" height="76" rx="6" fill="var(--paper)" stroke="var(--ink)" stroke-width="5"/>
+        <path d="M78 58h44M78 74h44M78 90h26" stroke="var(--ink)" stroke-width="4.5" stroke-linecap="round"/>
+        <rect x="38" y="86" width="124" height="76" rx="10" fill="var(--paper)" stroke="var(--ink)" stroke-width="5"/>
+        <path d="M38 90l58 48a8 8 0 0 0 8 0l58-48" stroke="var(--ink)" stroke-width="5" stroke-linejoin="round"/>
+        <path d="M40 158l46-40M160 158l-46-40" stroke="var(--ink)" stroke-width="4" stroke-linecap="round"/>
       </svg>
 
+      <!-- Postage stamp: perforated edge, two rings, a franking bar. -->
       <svg class="deco__disc-b" viewBox="0 0 200 200" fill="none">
         <circle cx="100" cy="100" r="92" fill="var(--tint-ochre)" stroke="var(--ink)" stroke-width="5"/>
-        <rect x="58" y="52" width="84" height="96" rx="10" fill="var(--paper)" stroke="var(--ink)" stroke-width="5"/>
-        <path d="M76 84h48M76 104h48M76 124h28" stroke="var(--ink)" stroke-width="5" stroke-linecap="round"/>
+        <rect x="50" y="38" width="100" height="124" rx="4" stroke="var(--ink)" stroke-width="4" stroke-dasharray="2 9" stroke-linecap="round"/>
+        <rect x="56" y="44" width="88" height="112" rx="3" fill="var(--paper)" stroke="var(--ink)" stroke-width="5"/>
+        <rect x="68" y="56" width="64" height="64" fill="var(--tint-magenta)" stroke="var(--ink)" stroke-width="4"/>
+        <circle cx="92" cy="88" r="15" stroke="var(--ink)" stroke-width="4"/>
+        <circle cx="110" cy="88" r="15" stroke="var(--magenta)" stroke-width="4"/>
+        <path d="M72 138h56" stroke="var(--ink)" stroke-width="4.5" stroke-linecap="round"/>
       </svg>
 
+      <!-- Small pieces of post: sealed envelope, stamp, paper plane, wax seal. -->
       <svg class="deco__confetti" viewBox="0 0 120 120" fill="none">
-        <circle cx="18" cy="26" r="8" fill="var(--indigo)" stroke="var(--ink)" stroke-width="3"/>
-        <rect x="54" y="10" width="16" height="16" rx="3" fill="var(--ochre)" stroke="var(--ink)" stroke-width="3" transform="rotate(22 62 18)"/>
-        <path d="M96 40l10 18H86z" fill="var(--magenta)" stroke="var(--ink)" stroke-width="3" stroke-linejoin="round"/>
-        <circle cx="34" cy="78" r="6" fill="var(--magenta)" stroke="var(--ink)" stroke-width="3"/>
-        <rect x="72" y="82" width="14" height="14" rx="3" fill="var(--indigo)" stroke="var(--ink)" stroke-width="3" transform="rotate(-16 79 89)"/>
+        <g transform="rotate(-14 26 28)">
+          <rect x="6" y="14" width="40" height="28" rx="4" fill="var(--indigo)" stroke="var(--ink)" stroke-width="3"/>
+          <path d="M6 18l20 14 20-14" stroke="var(--paper)" stroke-width="3" stroke-linejoin="round"/>
+        </g>
+        <g transform="rotate(12 74 22)">
+          <rect x="62" y="8" width="24" height="28" rx="2" fill="var(--ochre)" stroke="var(--ink)" stroke-width="3"/>
+          <circle cx="74" cy="22" r="6" stroke="var(--ink)" stroke-width="3"/>
+        </g>
+        <path d="M88 62l26-12-9 28-7-9z" fill="var(--magenta)" stroke="var(--ink)" stroke-width="3" stroke-linejoin="round"/>
+        <path d="M98 78l16-28" stroke="var(--ink)" stroke-width="3" stroke-linecap="round"/>
+        <circle cx="28" cy="82" r="11" fill="var(--magenta)" stroke="var(--ink)" stroke-width="3"/>
+        <path d="M24 82h8" stroke="var(--paper)" stroke-width="3" stroke-linecap="round"/>
       </svg>
     </div>
 
@@ -728,17 +747,23 @@ img, svg { max-width: 100%; display: block; }
 
       <ol class="steps">
         <li class="card step rise">
-          <span class="step__n" aria-hidden="true">1</span>
+          <span class="step__n" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 21h8"/><path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"/></svg>
+          </span>
           <h3>Pick a theme</h3>
           <p>Choose a design and type in your details. Everything previews as you go.</p>
         </li>
         <li class="card step rise">
-          <span class="step__n" aria-hidden="true">2</span>
+          <span class="step__n" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.536 21.686a.5.5 0 0 0 .937-.024l6.5-19a.496.496 0 0 0-.635-.635l-19 6.5a.5.5 0 0 0-.024.937l7.93 3.18a2 2 0 0 1 1.112 1.11z"/><path d="m21.854 2.147-10.94 10.939"/></svg>
+          </span>
           <h3>Share the link</h3>
           <p>You get a link and a QR code for printed cards. Send it however you like.</p>
         </li>
         <li class="card step rise">
-          <span class="step__n" aria-hidden="true">3</span>
+          <span class="step__n" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 13V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v12c0 1.1.9 2 2 2h8"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/><path d="m16 19 2 2 4-4"/></svg>
+          </span>
           <h3>Watch replies land</h3>
           <p>Headcounts and dietary notes collect themselves, ready for the caterer.</p>
         </li>
