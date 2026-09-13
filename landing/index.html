@@ -4,19 +4,25 @@
   Soft neo-brutalism: thick ink outlines, generous radii, hard offset shadows,
   flat accents in small doses. No gradients, no blur, no dark mode.
 
+  Density rules this page holds itself to, after the Gumroad review:
+    * One idea per section. One heading, one short paragraph, one action.
+    * The hero carries type and nothing else — no product shot competing
+      with the headline.
+    * Imagery is authored flat vector, bleeding off the viewport edges.
+      No stock photography: faces of real people cannot be licensed for
+      advertising without a model release.
+
   Componentisation map (each <section> maps to one Vue SFC):
-    SiteNav · HeroPanel · HowItWorks · ThemeGallery · PaperVsDigital
-    PricingTiers · PackageBuilder · Testimonials · FaqAccordion
-    DashboardTeaser · SiteFooter
-  Every design decision is a custom property in :root — port those to a
-  tokens.css and the components need no hard-coded values.
+    SiteNav · MenuOverlay · HeroPanel · HowItWorks · GuestPreview
+    ThemeGallery · PricingTiers · PackageBuilder · FaqAccordion
+    ClosingCta · SiteFooter
 -->
 <html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Imvite — digital invitations with RSVP, for weddings and life events</title>
-<meta name="description" content="Pick a theme, add your details, and share a link with a QR code. Guests RSVP from their phone and you track every reply in one dashboard. One payment, from €29. No subscription.">
+<title>Imvite — one link, and everyone replies</title>
+<meta name="description" content="Digital invitations for weddings and life events. Share one link with a QR code and watch the replies land in one place. One payment, from €29. No subscription.">
 <link rel="canonical" href="https://imvite.com/">
 <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
 
@@ -33,90 +39,81 @@
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Imvite">
 <meta property="og:url" content="https://imvite.com/">
-<meta property="og:title" content="Imvite — digital invitations with RSVP">
-<meta property="og:description" content="Pick a theme, share a link and a QR code, and watch the replies land in one dashboard. One payment, from €29.">
+<meta property="og:title" content="Imvite — one link, and everyone replies">
+<meta property="og:description" content="Share one link with a QR code. Guests RSVP from their phone in under a minute. One payment, from €29.">
 <meta property="og:image" content="https://imvite.com/og.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta property="og:image:alt" content="Imvite — digital invitations with RSVP.">
 <meta property="og:locale" content="en_GB">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="Imvite — digital invitations with RSVP">
-<meta name="twitter:description" content="Pick a theme, share a link and a QR code, and watch the replies land in one dashboard.">
+<meta name="twitter:title" content="Imvite — one link, and everyone replies">
+<meta name="twitter:description" content="Share one link with a QR code. Guests RSVP from their phone in under a minute.">
 <meta name="twitter:image" content="https://imvite.com/og.png">
 
 <!--
   TODO before launch: self-host these two families. The Google Fonts CDN adds a
   third-party connection and has already produced GDPR findings in Germany.
-  google-webfonts-helper or the @fontsource packages will give you the woff2s.
 -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700;9..144,900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
 <style>
 /* ==========================================================================
    TOKENS
    ========================================================================== */
 :root {
-  /* --- surface ------------------------------------------------------- */
-  --cream:        #FBF7F0;   /* page ground */
-  --paper:        #FFFDF9;   /* cards sitting on the ground */
-  --cream-deep:   #F3EBDC;   /* banded sections, inset wells */
+  --cream:        #FBF7F0;
+  --paper:        #FFFDF9;
+  --cream-deep:   #F3EBDC;
 
-  /* --- ink ------------------------------------------------------------ */
-  --ink:          #14213D;   /* borders + body text. 15.2:1 on cream */
-  --ink-soft:     #4C5673;   /* secondary text. 7.1:1 on cream */
+  --ink:          #14213D;   /* 15.2:1 on cream */
+  --ink-soft:     #4C5673;   /* 7.1:1 on cream */
 
-  /* --- accents --------------------------------------------------------
-     Each accent has ONE permitted job, set by its contrast on cream:
+  /* Each accent has ONE permitted job, fixed by its contrast on cream:
        indigo  5.9:1  — may be small text, links, icons, fills
        magenta 4.3:1  — large display text only, or a fill with white on it
-       ochre   2.0:1  — FILL ONLY. Never text. Always ink on top (7.4:1).
-     Breaking these is how the palette stops being accessible.            */
+       ochre   2.0:1  — FILL ONLY. Never text. Always ink on top (7.4:1). */
   --indigo:       #4F46E5;
-  --indigo-ink:   #3A32C4;   /* indigo darkened for small text, 7.6:1 */
+  --indigo-ink:   #3A32C4;
   --magenta:      #D6336C;
   --ochre:        #E8A33D;
 
-  /* Pale tints of each accent. The saturated accents are reserved for small
-     doses — a badge, an avatar, one filled button. Anything larger than that
-     uses a tint, which stays in the cream family and never reads as a wash. */
   --tint-indigo:  #E9E7FB;
   --tint-magenta: #FBE8EF;
   --tint-ochre:   #FAF0DC;
 
-  /* --- geometry -------------------------------------------------------- */
   --radius-card:  20px;
   --radius-ctl:   14px;
   --radius-pill:  999px;
   --radius-phone: 38px;
 
-  --bw-thin:      2px;       /* badges, inputs, small elements */
-  --bw-thick:     3px;       /* cards, primary buttons */
+  --bw-thin:      2px;
+  --bw-thick:     3px;
   --border:       var(--bw-thick) solid var(--ink);
   --border-thin:  var(--bw-thin)  solid var(--ink);
 
-  /* --- hard offset shadows. No blur, ever. ----------------------------- */
   --shadow:       5px 5px 0 var(--ink);
   --shadow-sm:    3px 3px 0 var(--ink);
   --shadow-press: 2px 2px 0 var(--ink);
 
-  /* --- type ------------------------------------------------------------ */
   --font-display: "Fraunces", "Iowan Old Style", Georgia, serif;
   --font-sans:    "Plus Jakarta Sans", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
 
-  --step--1: clamp(0.82rem, 0.79rem + 0.14vw, 0.9rem);
-  --step-0:  clamp(1rem, 0.96rem + 0.2vw, 1.115rem);
-  --step-1:  clamp(1.2rem, 1.12rem + 0.4vw, 1.45rem);
-  --step-2:  clamp(1.45rem, 1.3rem + 0.75vw, 1.95rem);
-  --step-3:  clamp(1.8rem, 1.5rem + 1.5vw, 2.7rem);
-  --step-4:  clamp(2.3rem, 1.7rem + 3vw, 4.1rem);
+  --step--1: clamp(0.85rem, 0.82rem + 0.14vw, 0.94rem);
+  --step-0:  clamp(1.02rem, 0.98rem + 0.2vw, 1.15rem);
+  --step-1:  clamp(1.2rem, 1.1rem + 0.5vw, 1.55rem);
+  --step-2:  clamp(1.5rem, 1.3rem + 0.9vw, 2.1rem);
+  --step-3:  clamp(2rem, 1.6rem + 2vw, 3.2rem);
+  /* Hero. Deliberately enormous — this is the whole point of the fold. */
+  --step-4:  clamp(3rem, 12.5vw, 7rem);
 
-  /* --- rhythm ---------------------------------------------------------- */
-  --gutter:    clamp(1.15rem, 4vw, 2.5rem);
-  --band:      clamp(3.5rem, 8vw, 6.5rem);
-  --shell:     78rem;
+  --gutter:    clamp(1.25rem, 5vw, 2.5rem);
+  --band:      clamp(4rem, 10vw, 7.5rem);
+  --shell:     72rem;
+
+  --nav-h: 4.5rem;
 
   --dur: 260ms;
   --ease: cubic-bezier(0.2, 0.8, 0.3, 1);
@@ -140,6 +137,9 @@
 html { scroll-behavior: smooth; }
 @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
 
+/* Sticky header would otherwise bury every heading an anchor jumps to. */
+[id] { scroll-margin-block-start: calc(var(--nav-h) + 1.5rem); }
+
 body {
   margin: 0;
   background: var(--cream);
@@ -148,20 +148,20 @@ body {
   font-size: var(--step-0);
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
-  text-rendering: optimizeLegibility;
   overflow-x: clip;
 }
+body.is-locked { overflow: hidden; }
 
 h1, h2, h3 {
   font-family: var(--font-display);
   font-weight: 700;
   font-variation-settings: "SOFT" 28, "WONK" 1;
-  line-height: 1.05;
-  letter-spacing: -0.018em;
+  line-height: 1.02;
+  letter-spacing: -0.022em;
   text-wrap: balance;
   margin: 0;
 }
-h1 { font-size: var(--step-4); }
+h1 { font-size: var(--step-4); font-weight: 900; line-height: 0.94; }
 h2 { font-size: var(--step-3); }
 h3 { font-size: var(--step-1); font-weight: 600; line-height: 1.2; }
 p  { margin: 0; text-wrap: pretty; }
@@ -176,10 +176,6 @@ img, svg { max-width: 100%; display: block; }
   outline-offset: 3px;
   border-radius: 4px;
 }
-
-/* Sticky header is ~4.5rem; without this an anchor jump buries the heading
-   underneath it. */
-:target, section[id], [id] { scroll-margin-block-start: 6rem; }
 
 .shell {
   inline-size: 100%;
@@ -204,17 +200,24 @@ img, svg { max-width: 100%; display: block; }
 .eyebrow {
   font-size: var(--step--1);
   font-weight: 800;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.12em;
   text-transform: uppercase;
   color: var(--indigo-ink);
-  margin: 0 0 0.75rem;
+  margin: 0 0 0.9rem;
 }
-.lede { font-size: var(--step-1); color: var(--ink-soft); max-inline-size: 44ch; }
-.section-head { max-inline-size: 54ch; margin-block-end: clamp(2rem, 4vw, 3rem); }
-.section-head p { margin-block-start: 0.9rem; color: var(--ink-soft); }
+.lede { font-size: var(--step-1); color: var(--ink-soft); max-inline-size: 32ch; }
+
+/* One heading, one short line. That is the whole section header. */
+.section-head { max-inline-size: 26ch; margin-block-end: clamp(2.5rem, 5vw, 3.5rem); }
+.section-head p { margin-block-start: 1rem; color: var(--ink-soft); max-inline-size: 34ch; }
+.section-head--center { margin-inline: auto; text-align: center; }
+.section-head--center p { margin-inline: auto; }
+
+.band { padding-block: var(--band); position: relative; }
+.band--deep { background: var(--cream-deep); border-block: var(--border); }
 
 /* ==========================================================================
-   PRIMITIVES — Btn, Card, Badge, Pill
+   PRIMITIVES
    ========================================================================== */
 .btn {
   display: inline-flex;
@@ -224,7 +227,7 @@ img, svg { max-width: 100%; display: block; }
   font: inherit;
   font-weight: 700;
   line-height: 1;
-  padding: 0.95rem 1.5rem;
+  padding: 1.05rem 1.7rem;
   border: var(--border);
   border-radius: var(--radius-ctl);
   background: var(--paper);
@@ -238,10 +241,10 @@ img, svg { max-width: 100%; display: block; }
 .btn:hover { transform: translate(-1px, -1px); box-shadow: 4px 4px 0 var(--ink); }
 .btn:active { transform: translate(2px, 2px); box-shadow: var(--shadow-press); }
 
-.btn--primary { background: var(--indigo); color: #fff; border-color: var(--ink); }
+.btn--primary { background: var(--indigo); color: #fff; }
 .btn--primary:hover { background: var(--indigo-ink); color: #fff; }
 
-.btn--lg { padding: 1.15rem 1.9rem; font-size: var(--step-0); box-shadow: var(--shadow); }
+.btn--lg { padding: 1.25rem 2.1rem; font-size: var(--step-0); box-shadow: var(--shadow); }
 .btn--lg:hover { box-shadow: 6px 6px 0 var(--ink); }
 .btn--lg:active { box-shadow: var(--shadow-press); }
 
@@ -257,11 +260,13 @@ img, svg { max-width: 100%; display: block; }
 .btn--ghost:hover { transform: none; box-shadow: none; text-decoration-color: var(--ink); }
 .btn--ghost:active { transform: translate(1px, 1px); box-shadow: none; }
 
+.btn--block { inline-size: 100%; }
+
 .card {
   background: var(--paper);
   border: var(--border);
   border-radius: var(--radius-card);
-  padding: clamp(1.25rem, 3vw, 1.9rem);
+  padding: clamp(1.4rem, 3vw, 2rem);
 }
 
 .badge {
@@ -270,14 +275,14 @@ img, svg { max-width: 100%; display: block; }
   gap: 0.45rem;
   font-size: var(--step--1);
   font-weight: 700;
-  padding: 0.4rem 0.85rem;
+  padding: 0.45rem 0.9rem;
   border: var(--border-thin);
   border-radius: var(--radius-pill);
-  background: var(--ochre);          /* fill only — ink sits on top */
+  background: var(--ochre);
   color: var(--ink);
 }
 .badge--paper { background: var(--paper); }
-.badge--magenta { background: var(--magenta); color: #fff; border-color: var(--ink); }
+.badge--magenta { background: var(--magenta); color: #fff; }
 
 .pill {
   display: inline-block;
@@ -289,42 +294,39 @@ img, svg { max-width: 100%; display: block; }
   background: var(--paper);
 }
 
-/* entrance — opacity + a few px, nothing more */
 .rise { opacity: 0; transform: translateY(14px); transition: opacity 520ms var(--ease), transform 520ms var(--ease); }
 .rise.is-in { opacity: 1; transform: none; }
 @media (prefers-reduced-motion: reduce) { .rise { opacity: 1; transform: none; } }
 
+[hidden] { display: none !important; }
+
 /* ==========================================================================
-   NAV
+   NAV  +  FULL-SCREEN MENU
    ========================================================================== */
 .nav {
   position: sticky;
   inset-block-start: 0;
-  z-index: 50;
+  z-index: 60;
   background: var(--cream);
   border-block-end: var(--border);
 }
-.nav__row {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  min-block-size: 4.5rem;
-}
+.nav__row { display: flex; align-items: center; gap: 1rem; min-block-size: var(--nav-h); }
+
 .wordmark {
   display: inline-flex;
   align-items: center;
   gap: 0.55rem;
   font-family: var(--font-display);
-  font-weight: 700;
-  font-size: 1.4rem;
-  letter-spacing: -0.02em;
+  font-weight: 900;
+  font-size: 1.45rem;
+  letter-spacing: -0.03em;
   color: var(--ink);
   text-decoration: none;
   margin-inline-end: auto;
 }
 .wordmark__mark {
-  inline-size: 2.1rem;
-  block-size: 2.1rem;
+  inline-size: 2.15rem;
+  block-size: 2.15rem;
   display: grid;
   place-items: center;
   background: var(--magenta);
@@ -335,39 +337,130 @@ img, svg { max-width: 100%; display: block; }
   font-size: 1rem;
   font-weight: 800;
 }
-.nav__links { display: none; gap: 1.6rem; align-items: center; }
+
+.nav__links { display: none; gap: 2rem; align-items: center; margin-inline-end: 1.5rem; }
 .nav__links a { color: var(--ink); font-weight: 600; text-decoration: none; font-size: var(--step--1); }
 .nav__links a:hover { text-decoration: underline; text-decoration-color: var(--ochre); text-decoration-thickness: 3px; }
-.nav__actions { display: flex; align-items: center; gap: 0.6rem; }
-.nav__login { display: none; font-weight: 700; color: var(--ink); text-decoration: none; font-size: var(--step--1); padding: 0.5rem; }
-.nav__login:hover { text-decoration: underline; }
 
-@media (min-width: 62rem) {
+.nav__cta { display: none; }
+
+.menu-btn {
+  inline-size: 3rem; block-size: 3rem;
+  display: grid; place-items: center;
+  border: var(--border); border-radius: var(--radius-ctl);
+  background: var(--paper); color: var(--ink); cursor: pointer;
+  box-shadow: var(--shadow-sm);
+}
+.menu-btn:active { transform: translate(2px,2px); box-shadow: var(--shadow-press); }
+
+@media (min-width: 60rem) {
   .nav__links { display: flex; }
-  .nav__login { display: inline-block; }
+  .nav__cta { display: inline-flex; }
+  .menu-btn { display: none; }
+}
+
+/* the overlay — one screen, big targets, action pinned at the bottom */
+.menu {
+  position: fixed;
+  inset: var(--nav-h) 0 0;
+  z-index: 55;
+  background: var(--cream);
+  display: grid;
+  grid-template-rows: 1fr auto;
+  overflow-y: auto;
+}
+.menu__links {
+  list-style: none;
+  margin: 0;
+  padding: clamp(1.5rem, 6vh, 3rem) var(--gutter);
+  display: grid;
+  align-content: center;
+  justify-items: center;
+  gap: clamp(1.5rem, 5vh, 2.75rem);
+}
+.menu__links a {
+  font-family: var(--font-display);
+  font-size: clamp(1.6rem, 7vw, 2.2rem);
+  font-weight: 600;
+  color: var(--ink);
+  text-decoration: none;
+  padding: 0.3rem 0.6rem;
+}
+.menu__links a:hover { text-decoration: underline; text-decoration-color: var(--ochre); text-decoration-thickness: 4px; }
+.menu__foot { padding: var(--gutter); border-block-start: var(--border); background: var(--paper); }
+
+/* ==========================================================================
+   HERO — type, and nothing competing with it
+   ========================================================================== */
+.hero {
+  position: relative;
+  padding-block: clamp(3.5rem, 11vw, 7rem) clamp(4rem, 12vw, 8rem);
+  overflow: clip;                     /* the decorative shapes bleed */
+  isolation: isolate;
+}
+.hero__inner { position: relative; z-index: 1; display: grid; justify-items: start; gap: 1.75rem; }
+.hero h1 { max-inline-size: 13ch; }
+.hero .lede { font-size: var(--step-1); }
+.hero__actions { display: flex; flex-wrap: wrap; align-items: center; gap: 1rem; }
+.hero__note { font-size: var(--step--1); color: var(--ink-soft); }
+
+/* --- the imagery ---------------------------------------------------------
+   Authored flat vector, bleeding off the edges the way Gumroad's discs do.
+   Decorative only: aria-hidden, pointer-events none, and it never reflows
+   the layout because it is absolutely positioned inside an overflow:clip
+   parent. */
+.deco { position: absolute; inset: 0; z-index: 0; pointer-events: none; }
+.deco > * { position: absolute; }
+
+.deco__disc-a { inline-size: clamp(12rem, 34vw, 24rem); inset-block-start: -14%; inset-inline-end: -10%; transform: rotate(14deg); }
+.deco__disc-b { inline-size: clamp(9rem, 26vw, 17rem); inset-block-end: -18%; inset-inline-start: -12%; transform: rotate(-18deg); }
+.deco__confetti { inline-size: clamp(7rem, 18vw, 11rem); inset-block-start: 6%; inset-inline-start: -4%; transform: rotate(-8deg); opacity: .9; }
+
+/* Below the desktop breakpoint the shapes get their own band at the foot of
+   the hero — the extra padding-block-end above reserves it — rather than
+   sitting behind the headline and the note, where they cost legibility. */
+@media (max-width: 60rem) {
+  .hero { padding-block-end: 15rem; }
+  .deco__disc-a { inset-block-start: auto; inset-block-end: -4rem; inset-inline-end: -5rem; inline-size: 15rem; }
+  .deco__disc-b { display: none; }
+  .deco__confetti { inset-block-start: auto; inset-block-end: 1rem; inset-inline-start: -1.5rem; inline-size: 8rem; }
+}
+
+@media (min-width: 60rem) {
+  /* Constrain the lines, not the column: .hero__inner keeps the shell's own
+     centred width so the text starts at the page's left margin rather than
+     floating in the middle with an empty third beside it. */
+  .hero h1 { max-inline-size: 11ch; }
+  .hero .lede { max-inline-size: 34ch; }
 }
 
 /* ==========================================================================
-   HERO
+   HOW IT WORKS — three steps, few words
    ========================================================================== */
-.hero { padding-block: clamp(2.5rem, 6vw, 5rem) var(--band); }
-.hero__grid { display: grid; gap: clamp(2.5rem, 6vw, 4rem); align-items: center; }
-.hero__actions { display: flex; flex-wrap: wrap; align-items: center; gap: 0.9rem; margin-block-start: 2rem; }
-.hero h1 { margin-block: 1.1rem 1.25rem; }
-.hero .lede { font-size: var(--step-1); }
-.hero__note { margin-block-start: 1.4rem; font-size: var(--step--1); color: var(--ink-soft); }
-.hero__mark { color: var(--magenta); font-style: italic; }
-
-@media (min-width: 60rem) {
-  .hero__grid { grid-template-columns: 1.05fr 0.95fr; }
+.steps { display: grid; gap: 1.25rem; grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr)); list-style: none; margin: 0; padding: 0; }
+.step { display: flex; flex-direction: column; gap: 0.8rem; }
+.step__n {
+  inline-size: 3.2rem; block-size: 3.2rem;
+  display: grid; place-items: center;
+  font-family: var(--font-display);
+  font-size: 1.5rem; font-weight: 700;
+  border: var(--border-thin);
+  border-radius: 12px;
 }
+.step:nth-child(1) .step__n { background: var(--indigo); color: #fff; }
+.step:nth-child(2) .step__n { background: var(--ochre); color: var(--ink); }
+.step:nth-child(3) .step__n { background: var(--magenta); color: #fff; }
+.step p { color: var(--ink-soft); font-size: var(--step--1); }
 
-/* --- phone mockup --------------------------------------------------------
-   Drawn in CSS so there is no image to license or ship. Scales by font-size:
-   every internal dimension is in em, so one clamp() resizes the whole device. */
+/* ==========================================================================
+   GUEST PREVIEW — the phone lives here now, not in the hero
+   ========================================================================== */
+.preview { display: grid; gap: clamp(2.5rem, 6vw, 4rem); align-items: center; }
+@media (min-width: 56rem) { .preview { grid-template-columns: 1fr 1fr; } }
+
 .phone-wrap { display: flex; justify-content: center; }
 .phone {
-  font-size: clamp(8px, 2.6vw, 11px);
+  font-size: clamp(8px, 2.4vw, 10.5px);
   inline-size: 26em;
   max-inline-size: 100%;
   background: var(--paper);
@@ -377,95 +470,38 @@ img, svg { max-width: 100%; display: block; }
   padding: 1.1em 1.1em 2.6em;
   position: relative;
 }
-.phone__notch {
-  inline-size: 7em; block-size: 0.55em;
-  background: var(--ink);
-  border-radius: var(--radius-pill);
-  margin: 0.2em auto 0.9em;
-}
-.invite {
-  background: var(--cream-deep);
-  border: var(--border-thin);
-  border-radius: 16px;
-  padding: 1.7em 1.4em;
-  text-align: center;
-}
+.phone__notch { inline-size: 7em; block-size: 0.55em; background: var(--ink); border-radius: var(--radius-pill); margin: 0.2em auto 0.9em; }
+.invite { background: var(--cream-deep); border: var(--border-thin); border-radius: 16px; padding: 1.7em 1.4em; text-align: center; }
 .invite__rule { display: flex; align-items: center; justify-content: center; gap: 0.5em; color: var(--ochre); }
-.invite__rule::before, .invite__rule::after {
-  content: ""; block-size: 0.2em; inline-size: 3em; background: currentColor; border-radius: var(--radius-pill);
-}
+.invite__rule::before, .invite__rule::after { content: ""; block-size: 0.2em; inline-size: 3em; background: currentColor; border-radius: var(--radius-pill); }
 .invite__diamond { inline-size: 0.7em; block-size: 0.7em; background: var(--ochre); transform: rotate(45deg); border-radius: 2px; }
 .invite__kicker { font-size: 0.95em; letter-spacing: 0.14em; text-transform: uppercase; font-weight: 700; color: var(--ink-soft); margin-block: 1.2em 0.5em; }
 .invite__names { font-family: var(--font-display); font-size: 3.1em; font-weight: 600; line-height: 1.05; margin: 0; }
 .invite__date { font-size: 1.1em; color: var(--ink-soft); margin-block-start: 0.6em; font-weight: 500; }
 .invite__photo {
-  block-size: 8em;
-  margin-block: 1.3em;
-  border: var(--border-thin);
-  border-radius: 12px;
-  background:
-    repeating-linear-gradient(45deg, transparent 0 0.9em, rgba(20,33,61,.055) 0.9em 1.8em),
-    var(--cream);
+  block-size: 8em; margin-block: 1.3em;
+  border: var(--border-thin); border-radius: 12px;
+  background: repeating-linear-gradient(45deg, transparent 0 0.9em, rgba(20,33,61,.055) 0.9em 1.8em), var(--cream);
 }
 .invite__days { display: flex; flex-wrap: wrap; gap: 0.45em; justify-content: center; margin-block-end: 1.3em; }
-.invite__days span {
-  font-size: 0.95em; font-weight: 700; padding: 0.35em 0.8em;
-  border: var(--border-thin); border-radius: var(--radius-pill); background: var(--paper);
-}
+.invite__days span { font-size: 0.95em; font-weight: 700; padding: 0.35em 0.8em; border: var(--border-thin); border-radius: var(--radius-pill); background: var(--paper); }
 .invite__ask { font-family: var(--font-display); font-size: 1.5em; font-weight: 600; margin-block-end: 0.8em; }
 .invite__btns { display: grid; grid-template-columns: 1fr 1fr; gap: 0.6em; }
-.invite__btns span {
-  font-size: 1.1em; font-weight: 700; padding: 0.75em 0.5em; text-align: center;
-  border: var(--border-thin); border-radius: 10px; background: var(--paper);
-}
+.invite__btns span { font-size: 1.1em; font-weight: 700; padding: 0.75em 0.5em; text-align: center; border: var(--border-thin); border-radius: 10px; background: var(--paper); }
 .invite__btns .yes { background: var(--indigo); color: #fff; }
-
 .phone__qr {
-  position: absolute;
-  inset-block-end: -2.2em;
-  inset-inline-end: -1.2em;
+  position: absolute; inset-block-end: -2.2em; inset-inline-end: -1.2em;
   display: flex; align-items: center; gap: 0.6em;
-  background: var(--ochre);
-  border: var(--border);
-  border-radius: var(--radius-ctl);
-  padding: 0.7em 0.9em;
-  font-size: 1.15em;
-  font-weight: 700;
-  box-shadow: var(--shadow-sm);
+  background: var(--ochre); border: var(--border); border-radius: var(--radius-ctl);
+  padding: 0.7em 0.9em; font-size: 1.15em; font-weight: 700; box-shadow: var(--shadow-sm);
 }
 .qr-glyph { inline-size: 2.6em; block-size: 2.6em; flex: none; }
 
 /* ==========================================================================
-   BANDS
-   ========================================================================== */
-.band { padding-block: var(--band); }
-.band--deep { background: var(--cream-deep); border-block: var(--border); }
-
-/* ==========================================================================
-   HOW IT WORKS
-   ========================================================================== */
-.steps { display: grid; gap: 1.25rem; grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr)); }
-.step { display: flex; flex-direction: column; gap: 0.7rem; }
-.step__n {
-  inline-size: 2.9rem; block-size: 2.9rem;
-  display: grid; place-items: center;
-  font-family: var(--font-display);
-  font-size: 1.35rem; font-weight: 700;
-  border: var(--border-thin);
-  border-radius: 12px;
-  margin-block-end: 0.3rem;
-}
-.step:nth-child(1) .step__n { background: var(--indigo); color: #fff; }
-.step:nth-child(2) .step__n { background: var(--ochre); color: var(--ink); }
-.step:nth-child(3) .step__n { background: var(--magenta); color: #fff; }
-.step:nth-child(4) .step__n { background: var(--paper); color: var(--ink); }
-.step p { color: var(--ink-soft); font-size: var(--step--1); }
-
-/* ==========================================================================
    THEMES
    ========================================================================== */
-.gallery__head { display: flex; align-items: flex-end; gap: 1rem; flex-wrap: wrap; margin-block-end: 2rem; }
-.gallery__head .section-head { margin-block-end: 0; flex: 1 1 24rem; }
+.gallery__head { display: flex; align-items: flex-end; gap: 1rem; flex-wrap: wrap; margin-block-end: 2.5rem; }
+.gallery__head .section-head { margin-block-end: 0; flex: 1 1 22rem; }
 .gallery__nav { display: flex; gap: 0.5rem; }
 .icon-btn {
   inline-size: 3rem; block-size: 3rem;
@@ -479,57 +515,31 @@ img, svg { max-width: 100%; display: block; }
 .icon-btn:active { transform: translate(2px,2px); box-shadow: var(--shadow-press); }
 
 .rail {
-  display: grid;
-  grid-auto-flow: column;
-  grid-auto-columns: minmax(15rem, 17rem);
-  gap: 1.25rem;
-  overflow-x: auto;
-  scroll-snap-type: x mandatory;
-  padding-block-end: 1.25rem;
-  padding-inline: 0.3rem;
-  margin-inline: -0.3rem;
-  scrollbar-width: thin;
+  display: grid; grid-auto-flow: column; grid-auto-columns: minmax(14rem, 16rem);
+  gap: 1.25rem; overflow-x: auto; scroll-snap-type: x mandatory;
+  padding-block-end: 1.25rem; padding-inline: 0.3rem; margin-inline: -0.3rem;
+  list-style: none; margin-block: 0;
 }
 .rail > * { scroll-snap-align: start; }
-
 .theme-card { padding: 0; overflow: hidden; box-shadow: var(--shadow-sm); }
-.theme-card__art { block-size: 13rem; border-block-end: var(--border); display: grid; place-items: center; padding: 1rem; }
-.theme-card__rule { inline-size: 2.4rem; block-size: 4px; border-radius: var(--radius-pill); }
+.theme-card__art { block-size: 12rem; border-block-end: var(--border); display: grid; place-items: center; padding: 1rem; }
 .theme-card__inner {
   inline-size: 100%; block-size: 100%;
   border: var(--border-thin); border-radius: 12px;
   display: grid; place-items: center; gap: 0.5rem; text-align: center;
-  padding: 1rem;
-  background: var(--paper);
+  padding: 1rem; background: var(--paper);
 }
-.theme-card__name { font-family: var(--font-display); font-size: 1.6rem; font-weight: 600; }
-.theme-card__sub { font-size: 0.72rem; letter-spacing: 0.16em; text-transform: uppercase; font-weight: 700; color: var(--ink-soft); }
+.theme-card__rule { inline-size: 2.4rem; block-size: 4px; border-radius: var(--radius-pill); }
+.theme-card__name { font-family: var(--font-display); font-size: 1.55rem; font-weight: 600; }
+.theme-card__sub { font-size: 0.7rem; letter-spacing: 0.16em; text-transform: uppercase; font-weight: 700; color: var(--ink-soft); }
 .theme-card__foot { display: flex; align-items: center; justify-content: space-between; gap: 0.75rem; padding: 1rem 1.15rem; }
-.theme-card__foot strong { font-weight: 700; }
-
-/* ==========================================================================
-   PAPER VS DIGITAL
-   ========================================================================== */
-.versus { display: grid; gap: 1.25rem; align-items: start; }
-@media (min-width: 48rem) { .versus { grid-template-columns: 1fr 1fr; } }
-.versus__col h3 { display: flex; align-items: center; gap: 0.6rem; margin-block-end: 1.1rem; }
-.versus__col--paper { background: var(--cream-deep); }
-.versus__col--digital { box-shadow: var(--shadow); }
-.versus ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.85rem; }
-.versus li { display: grid; grid-template-columns: 1.6rem minmax(0, 1fr); gap: 0.75rem; align-items: start; font-size: var(--step--1); }
-.versus li span[aria-hidden] {
-  inline-size: 1.6rem; block-size: 1.6rem; border-radius: 50%;
-  display: grid; place-items: center; border: var(--bw-thin) solid var(--ink); font-weight: 800; font-size: 0.8rem;
-}
-.versus__col--paper li span[aria-hidden] { background: var(--paper); }
-.versus__col--digital li span[aria-hidden] { background: var(--indigo); color: #fff; }
 
 /* ==========================================================================
    PRICING
    ========================================================================== */
 .tiers { display: grid; gap: 1.5rem; grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr)); align-items: start; }
 .tier { display: flex; flex-direction: column; gap: 1rem; position: relative; }
-.tier--popular { box-shadow: var(--shadow); border-width: var(--bw-thick); }
+.tier--popular { box-shadow: var(--shadow); }
 .tier__flag { position: absolute; inset-block-start: -0.9rem; inset-inline-start: 1.4rem; }
 .tier__name { font-family: var(--font-display); font-size: var(--step-1); font-weight: 600; }
 .tier__price { font-family: var(--font-display); font-size: var(--step-3); font-weight: 700; line-height: 1; }
@@ -540,37 +550,22 @@ img, svg { max-width: 100%; display: block; }
 .tier li svg { margin-block-start: 0.28rem; color: var(--indigo-ink); }
 .tier .btn { margin-block-start: auto; }
 
-/* --- package builder ----------------------------------------------------- */
-.builder { margin-block-start: clamp(2.5rem, 5vw, 4rem); display: grid; gap: 1.5rem; align-items: start; }
-@media (min-width: 58rem) { .builder { grid-template-columns: 1.35fr 0.65fr; } }
+/* builder, folded away by default so pricing reads as three clean tiers */
+.builder-toggle { display: grid; justify-items: center; margin-block-start: 2.5rem; }
+.builder { margin-block-start: 1.5rem; display: grid; gap: 1.5rem; align-items: start; }
+@media (min-width: 56rem) { .builder { grid-template-columns: 1.35fr 0.65fr; } }
 
 .addons { list-style: none; margin: 1.25rem 0 0; padding: 0; display: grid; gap: 0.75rem; }
 .addon { position: relative; }
-.addon input {
-  position: absolute; inset-block-start: 50%; inset-inline-start: 1.1rem;
-  inline-size: 1.35rem; block-size: 1.35rem; margin: 0; transform: translateY(-50%);
-  opacity: 0; pointer-events: none;
-}
+.addon input { position: absolute; inset-block-start: 50%; inset-inline-start: 1.1rem; inline-size: 1.35rem; block-size: 1.35rem; margin: 0; transform: translateY(-50%); opacity: 0; pointer-events: none; }
 .addon label {
-  display: grid;
-  grid-template-columns: 1.6rem minmax(0, 1fr) auto;
-  gap: 0.9rem;
-  align-items: center;
-  padding: 0.95rem 1.15rem;
-  border: var(--border-thin);
-  border-radius: var(--radius-ctl);
-  background: var(--paper);
-  cursor: pointer;
+  display: grid; grid-template-columns: 1.6rem minmax(0, 1fr) auto; gap: 0.9rem; align-items: center;
+  padding: 0.95rem 1.15rem; border: var(--border-thin); border-radius: var(--radius-ctl);
+  background: var(--paper); cursor: pointer;
   transition: background-color var(--dur) var(--ease), box-shadow var(--dur) var(--ease), transform var(--dur) var(--ease);
 }
 .addon label:hover { transform: translate(-1px,-1px); box-shadow: var(--shadow-sm); }
-.addon__box {
-  inline-size: 1.6rem; block-size: 1.6rem;
-  border: var(--border-thin); border-radius: 7px;
-  background: var(--cream);
-  display: grid; place-items: center;
-  color: transparent;
-}
+.addon__box { inline-size: 1.6rem; block-size: 1.6rem; border: var(--border-thin); border-radius: 7px; background: var(--cream); display: grid; place-items: center; color: transparent; }
 .addon__name { font-weight: 600; font-size: var(--step--1); }
 .addon__name em { display: block; font-style: normal; font-weight: 400; color: var(--ink-soft); font-size: 0.86em; }
 .addon__price { font-weight: 700; font-variant-numeric: tabular-nums; }
@@ -578,60 +573,29 @@ img, svg { max-width: 100%; display: block; }
 .addon input:checked + label .addon__box { background: var(--indigo); color: #fff; }
 .addon input:focus-visible + label { outline: var(--bw-thick) solid var(--magenta); outline-offset: 3px; }
 
-.total { position: sticky; inset-block-start: 6rem; box-shadow: var(--shadow); }
+.total { box-shadow: var(--shadow); }
 .total__rows { list-style: none; margin: 1rem 0; padding: 0; display: grid; gap: 0.5rem; font-size: var(--step--1); }
 .total__rows li { display: flex; justify-content: space-between; gap: 1rem; color: var(--ink-soft); }
 .total__rows li b { font-weight: 600; color: var(--ink); font-variant-numeric: tabular-nums; }
-.total__sum {
-  display: flex; align-items: baseline; justify-content: space-between; gap: 1rem;
-  border-block-start: var(--border-thin); padding-block-start: 1rem; margin-block-start: 1rem;
-}
+.total__sum { display: flex; align-items: baseline; justify-content: space-between; gap: 1rem; border-block-start: var(--border-thin); padding-block-start: 1rem; margin-block-start: 1rem; }
 .total__sum span { font-weight: 700; }
 .total__sum output { font-family: var(--font-display); font-size: var(--step-3); font-weight: 700; font-variant-numeric: tabular-nums; }
 .total__note { font-size: 0.8rem; color: var(--ink-soft); margin-block-start: 0.9rem; }
 
 /* ==========================================================================
-   TESTIMONIALS
-   ========================================================================== */
-.quotes { display: grid; gap: 1.25rem; grid-template-columns: repeat(auto-fit, minmax(17rem, 1fr)); }
-.quote { display: flex; flex-direction: column; gap: 1.1rem; }
-.quote blockquote { margin: 0; font-size: var(--step-0); }
-.quote figcaption { display: flex; align-items: center; gap: 0.8rem; margin-block-start: auto; }
-.avatar {
-  inline-size: 2.9rem; block-size: 2.9rem; flex: none;
-  display: grid; place-items: center;
-  border: var(--border-thin); border-radius: 50%;
-  font-weight: 800; font-size: var(--step--1);
-}
-.avatar--indigo  { background: var(--indigo);  color: #fff; }
-.avatar--magenta { background: var(--magenta); color: #fff; }
-.avatar--ochre   { background: var(--ochre);   color: var(--ink); }
-.quote figcaption b { display: block; font-weight: 700; font-size: var(--step--1); }
-.quote figcaption span { font-size: 0.82rem; color: var(--ink-soft); }
-
-/* ==========================================================================
    FAQ
    ========================================================================== */
-.faq { display: grid; gap: 0.9rem; max-inline-size: 48rem; }
-.faq details {
-  border: var(--border-thin);
-  border-radius: var(--radius-ctl);
-  background: var(--paper);
-  overflow: hidden;
-}
+.faq { display: grid; gap: 0.9rem; max-inline-size: 46rem; margin-inline: auto; }
+.faq details { border: var(--border-thin); border-radius: var(--radius-ctl); background: var(--paper); overflow: hidden; }
 .faq details[open] { box-shadow: var(--shadow-sm); }
 .faq summary {
-  list-style: none;
-  cursor: pointer;
-  padding: 1.05rem 1.25rem;
-  font-weight: 700;
+  list-style: none; cursor: pointer; padding: 1.15rem 1.3rem; font-weight: 700;
   display: flex; align-items: center; justify-content: space-between; gap: 1rem;
 }
 .faq summary::-webkit-details-marker { display: none; }
 .faq summary:focus-visible { outline: var(--bw-thick) solid var(--magenta); outline-offset: -3px; }
 .faq summary::after {
-  content: ""; flex: none;
-  inline-size: 1.5rem; block-size: 1.5rem;
+  content: ""; flex: none; inline-size: 1.5rem; block-size: 1.5rem;
   border: var(--bw-thin) solid var(--ink); border-radius: 6px;
   background:
     linear-gradient(var(--ink), var(--ink)) center/0.7rem 2px no-repeat,
@@ -640,61 +604,30 @@ img, svg { max-width: 100%; display: block; }
   transition: transform var(--dur) var(--ease);
 }
 .faq details[open] summary::after {
-  background:
-    linear-gradient(var(--ink), var(--ink)) center/0.7rem 2px no-repeat,
-    var(--ochre);
+  background: linear-gradient(var(--ink), var(--ink)) center/0.7rem 2px no-repeat, var(--ochre);
   transform: rotate(180deg);
 }
-.faq__body { padding: 0 1.25rem 1.25rem; color: var(--ink-soft); font-size: var(--step--1); }
-.faq__body p + p { margin-block-start: 0.7rem; }
+.faq__body { padding: 0 1.3rem 1.3rem; color: var(--ink-soft); font-size: var(--step--1); }
 
 /* ==========================================================================
-   DASHBOARD TEASER
+   CLOSING + FOOTER
    ========================================================================== */
-.dash { display: grid; gap: clamp(2rem, 5vw, 3.5rem); align-items: center; }
-@media (min-width: 58rem) { .dash { grid-template-columns: 0.9fr 1.1fr; } }
-.dash__panel { padding: clamp(1rem, 2.5vw, 1.5rem); box-shadow: var(--shadow); }
-/* minmax(0,1fr), not 1fr: a bare 1fr is floored by the column's min-content
-   width, and "Can't make it" is wide enough to burst 320px. */
-.dash__stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0.7rem; }
-.stat { border: var(--border-thin); border-radius: var(--radius-ctl); padding: 0.85rem 0.8rem; text-align: center; }
-.stat b { display: block; font-family: var(--font-display); font-size: var(--step-2); font-weight: 700; line-height: 1; }
-.stat span { font-size: 0.74rem; font-weight: 700; letter-spacing: 0.07em; text-transform: uppercase; color: var(--ink-soft); overflow-wrap: anywhere; }
-.stat--yes { background: var(--indigo); }
-.stat--yes b, .stat--yes span { color: #fff; }
-.stat--wait { background: var(--ochre); }
-.stat--wait span { color: var(--ink); }
-
-.dash__list { list-style: none; margin: 0.8rem 0 0; padding: 0; display: grid; gap: 0.55rem; }
-.dash__list li {
-  display: grid; grid-template-columns: 2rem minmax(0, 1fr) auto; gap: 0.75rem; align-items: center;
-  border: var(--border-thin); border-radius: var(--radius-ctl); padding: 0.6rem 0.8rem;
-  font-size: var(--step--1); background: var(--paper);
-}
-.dash__list .avatar { inline-size: 2rem; block-size: 2rem; font-size: 0.72rem; }
-.dash__list em { font-style: normal; font-weight: 700; }
-.dash__list .pill { font-size: 0.74rem; }
-
-/* ==========================================================================
-   FOOTER
-   ========================================================================== */
-.cta-strip { text-align: center; display: grid; gap: 1.2rem; justify-items: center; }
-.cta-strip h2 { max-inline-size: 18ch; }
+.cta-strip { text-align: center; display: grid; gap: 1.4rem; justify-items: center; position: relative; z-index: 1; }
+.cta-strip h2 { max-inline-size: 15ch; }
 
 .foot { border-block-start: var(--border); background: var(--cream-deep); padding-block: clamp(2.5rem, 5vw, 3.5rem); }
 .foot__grid { display: grid; gap: 2rem; }
-@media (min-width: 48rem) { .foot__grid { grid-template-columns: 1.4fr 1fr 1fr 1fr; } }
+@media (min-width: 48rem) { .foot__grid { grid-template-columns: 1.6fr 1fr 1fr; } }
 .foot h4 { font-size: var(--step--1); font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; margin: 0 0 0.9rem; }
 .foot ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.55rem; font-size: var(--step--1); }
 .foot a { color: var(--ink); text-decoration: none; }
 .foot a:hover { text-decoration: underline; text-decoration-color: var(--ochre); text-decoration-thickness: 3px; }
 .foot__bottom {
-  margin-block-start: 2.5rem; padding-block-start: 1.5rem;
-  border-block-start: var(--border-thin);
+  margin-block-start: 2.5rem; padding-block-start: 1.5rem; border-block-start: var(--border-thin);
   display: flex; flex-wrap: wrap; gap: 1rem; justify-content: space-between;
   font-size: 0.82rem; color: var(--ink-soft);
 }
-.foot__blurb { font-size: var(--step--1); color: var(--ink-soft); max-inline-size: 30ch; margin-block-start: 0.8rem; }
+.foot__blurb { font-size: var(--step--1); color: var(--ink-soft); max-inline-size: 28ch; margin-block-start: 0.8rem; }
 </style>
 </head>
 
@@ -716,55 +649,133 @@ img, svg { max-width: 100%; display: block; }
       <a href="#faq">FAQ</a>
     </nav>
 
-    <div class="nav__actions">
-      <a class="nav__login" href="#login">Log in</a>
-      <a class="btn btn--primary" href="#get-started">Get started</a>
-    </div>
+    <a class="btn btn--primary nav__cta" href="#get-started">Get started</a>
+
+    <button class="menu-btn" type="button" id="menu-btn" aria-expanded="false" aria-controls="menu" aria-label="Open menu">
+      <svg id="menu-icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" aria-hidden="true">
+        <path d="M4 7h16M4 12h16M4 17h16"/>
+      </svg>
+    </button>
   </div>
 </header>
+
+<!-- ===================== MenuOverlay ===================== -->
+<div class="menu" id="menu" role="dialog" aria-modal="true" aria-label="Menu" hidden>
+  <ul class="menu__links">
+    <li><a href="#how">How it works</a></li>
+    <li><a href="#preview">See a real invitation</a></li>
+    <li><a href="#themes">Themes</a></li>
+    <li><a href="#pricing">Pricing</a></li>
+    <li><a href="#faq">FAQ</a></li>
+    <li><a href="#login">Log in</a></li>
+  </ul>
+  <div class="menu__foot">
+    <a class="btn btn--primary btn--lg btn--block" href="#get-started">Create your invitation</a>
+  </div>
+</div>
 
 <main id="main">
 
   <!-- ===================== HeroPanel ===================== -->
   <section class="hero">
-    <div class="shell hero__grid">
+    <!-- Decorative vector, bleeding off the edges. Authored here: no stock
+         imagery, no licence to track, nothing to attribute. -->
+    <div class="deco" aria-hidden="true">
+      <svg class="deco__disc-a" viewBox="0 0 200 200" fill="none">
+        <circle cx="100" cy="100" r="92" fill="var(--tint-magenta)" stroke="var(--ink)" stroke-width="5"/>
+        <rect x="46" y="66" width="108" height="74" rx="8" fill="var(--paper)" stroke="var(--ink)" stroke-width="5"/>
+        <path d="M46 74l54 40 54-40" stroke="var(--ink)" stroke-width="5" stroke-linejoin="round" fill="none"/>
+        <circle cx="100" cy="100" r="92" stroke="var(--magenta)" stroke-width="2" stroke-dasharray="10 12" fill="none"/>
+      </svg>
+
+      <svg class="deco__disc-b" viewBox="0 0 200 200" fill="none">
+        <circle cx="100" cy="100" r="92" fill="var(--tint-ochre)" stroke="var(--ink)" stroke-width="5"/>
+        <rect x="58" y="52" width="84" height="96" rx="10" fill="var(--paper)" stroke="var(--ink)" stroke-width="5"/>
+        <path d="M76 84h48M76 104h48M76 124h28" stroke="var(--ink)" stroke-width="5" stroke-linecap="round"/>
+      </svg>
+
+      <svg class="deco__confetti" viewBox="0 0 120 120" fill="none">
+        <circle cx="18" cy="26" r="8" fill="var(--indigo)" stroke="var(--ink)" stroke-width="3"/>
+        <rect x="54" y="10" width="16" height="16" rx="3" fill="var(--ochre)" stroke="var(--ink)" stroke-width="3" transform="rotate(22 62 18)"/>
+        <path d="M96 40l10 18H86z" fill="var(--magenta)" stroke="var(--ink)" stroke-width="3" stroke-linejoin="round"/>
+        <circle cx="34" cy="78" r="6" fill="var(--magenta)" stroke="var(--ink)" stroke-width="3"/>
+        <rect x="72" y="82" width="14" height="14" rx="3" fill="var(--indigo)" stroke="var(--ink)" stroke-width="3" transform="rotate(-16 79 89)"/>
+      </svg>
+    </div>
+
+    <div class="shell hero__inner rise">
+      <p class="badge"><span aria-hidden="true">●</span> One payment, from €29</p>
+      <h1>One link. Everyone replies.</h1>
+      <p class="lede">
+        Share it once. Your guests RSVP from their phone, and every answer
+        lands in one place.
+      </p>
+      <div class="hero__actions">
+        <a class="btn btn--primary btn--lg" href="#get-started">Create your invitation</a>
+        <a class="btn btn--ghost" href="demo/">See a real one</a>
+      </div>
+      <p class="hero__note">Free to build. You only pay when you publish.</p>
+    </div>
+  </section>
+
+  <!-- ===================== HowItWorks ===================== -->
+  <section class="band band--deep" id="how">
+    <div class="shell">
+      <div class="section-head rise">
+        <p class="eyebrow">How it works</p>
+        <h2>Three steps. One evening.</h2>
+      </div>
+
+      <ol class="steps">
+        <li class="card step rise">
+          <span class="step__n" aria-hidden="true">1</span>
+          <h3>Pick a theme</h3>
+          <p>Choose a design and type in your details. Everything previews as you go.</p>
+        </li>
+        <li class="card step rise">
+          <span class="step__n" aria-hidden="true">2</span>
+          <h3>Share the link</h3>
+          <p>You get a link and a QR code for printed cards. Send it however you like.</p>
+        </li>
+        <li class="card step rise">
+          <span class="step__n" aria-hidden="true">3</span>
+          <h3>Watch replies land</h3>
+          <p>Headcounts and dietary notes collect themselves, ready for the caterer.</p>
+        </li>
+      </ol>
+    </div>
+  </section>
+
+  <!-- ===================== GuestPreview ===================== -->
+  <section class="band" id="preview">
+    <div class="shell preview">
       <div class="rise">
-        <p class="badge"><span aria-hidden="true">●</span> One payment, from €29</p>
-        <h1>Invitations your guests actually <span class="hero__mark">reply</span> to.</h1>
-        <p class="lede">
-          Pick a theme, add your details, and share one link with a QR code.
-          Guests open it on their phone and RSVP in under a minute — no app, no
-          account, no chasing people in a group chat.
+        <p class="eyebrow">What guests see</p>
+        <h2>This opens on their phone.</h2>
+        <p class="lede" style="margin-block-start: 1.25rem;">
+          No app. No account. They tap, read, and reply in under a minute —
+          even the ones who never reply to anything.
         </p>
-
-        <div class="hero__actions">
-          <a class="btn btn--primary btn--lg" href="#get-started">Create your invitation</a>
-          <a class="btn btn--ghost" href="demo/">View demo</a>
-        </div>
-
-        <p class="hero__note">
-          Pay once when you publish. No subscription, nothing to cancel.
+        <p style="margin-block-start: 2rem;">
+          <a class="btn btn--lg" href="demo/">Open the live demo</a>
         </p>
       </div>
 
       <div class="phone-wrap rise">
         <div class="phone">
           <div class="phone__notch" aria-hidden="true"></div>
-
-          <!-- A representative invitation, drawn in CSS. Not a real customer. -->
           <div class="invite">
             <p class="invite__rule" aria-hidden="true"><span class="invite__diamond"></span></p>
             <p class="invite__kicker">Together with their families</p>
-            <p class="invite__names">Anna &amp; Luis</p>
+            <p class="invite__names"><bdi>Anna &amp; Luis</bdi></p>
             <p class="invite__date">Saturday, 17 July 2027 · Bath</p>
             <div class="invite__photo" role="img" aria-label="Placeholder for the couple's photograph"></div>
             <p class="invite__days"><span>Welcome dinner</span><span>Ceremony</span><span>Reception</span></p>
             <p class="invite__ask">Will you join us?</p>
             <p class="invite__btns"><span class="yes">Count me in</span><span>Sadly, no</span></p>
           </div>
-
           <p class="phone__qr">
-            <svg class="qr-glyph" viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="currentColor">
+            <svg class="qr-glyph" viewBox="0 0 24 24" aria-hidden="true" fill="currentColor">
               <path d="M3 3h7v7H3V3Zm2 2v3h3V5H5Zm9-2h7v7h-7V3Zm2 2v3h3V5h-3ZM3 14h7v7H3v-7Zm2 2v3h3v-3H5Zm9-2h3v3h-3v-3Zm5 0h2v2h-2v-2Zm-5 5h3v2h-3v-2Zm5 0h2v2h-2v-2Z"/>
             </svg>
             Print the code<br>on the card
@@ -774,48 +785,13 @@ img, svg { max-width: 100%; display: block; }
     </div>
   </section>
 
-  <!-- ===================== HowItWorks ===================== -->
-  <section class="band band--deep" id="how">
-    <div class="shell">
-      <div class="section-head rise">
-        <p class="eyebrow">How it works</p>
-        <h2>Four steps, one evening.</h2>
-        <p>No design software, no developer, no waiting on a print shop.</p>
-      </div>
-
-      <ol class="steps" style="list-style: none; margin: 0; padding: 0;">
-        <li class="card step rise">
-          <span class="step__n" aria-hidden="true">1</span>
-          <h3>Pick a theme</h3>
-          <p>Browse the gallery and choose the one that feels like your day. You can change it later without retyping a word.</p>
-        </li>
-        <li class="card step rise">
-          <span class="step__n" aria-hidden="true">2</span>
-          <h3>Add your details</h3>
-          <p>Names, dates, venues, the schedule, your story, photographs. Everything previews live as you type.</p>
-        </li>
-        <li class="card step rise">
-          <span class="step__n" aria-hidden="true">3</span>
-          <h3>Pay once and publish</h3>
-          <p>You get a link, a QR code for printed cards, and a preview card that shows your names when the link is shared.</p>
-        </li>
-        <li class="card step rise">
-          <span class="step__n" aria-hidden="true">4</span>
-          <h3>Watch the replies land</h3>
-          <p>Every RSVP, headcount and meal preference collects itself in one dashboard you can hand straight to the caterer.</p>
-        </li>
-      </ol>
-    </div>
-  </section>
-
   <!-- ===================== ThemeGallery ===================== -->
-  <section class="band" id="themes">
+  <section class="band band--deep" id="themes">
     <div class="shell">
       <div class="gallery__head rise">
         <div class="section-head">
           <p class="eyebrow">Themes</p>
-          <h2>Nine designs. None of them look like a template.</h2>
-          <p>Every theme is built to the same content structure, so switching is one click and you lose nothing.</p>
+          <h2>Nine designs to start from.</h2>
         </div>
         <div class="gallery__nav">
           <button class="icon-btn" type="button" data-rail-prev aria-controls="theme-rail" aria-label="Scroll themes left">
@@ -829,13 +805,7 @@ img, svg { max-width: 100%; display: block; }
     </div>
 
     <div class="shell">
-      <!--
-        Horizontally scrollable region. tabindex="0" so keyboard users can
-        scroll it; role+label so screen readers announce it as a scrollable
-        area rather than a loose pile of cards.
-      -->
-      <ul class="rail" id="theme-rail" tabindex="0" role="region" aria-label="Theme gallery, scrollable"
-          style="list-style: none; margin: 0;">
+      <ul class="rail" id="theme-rail" tabindex="0" role="region" aria-label="Theme gallery, scrollable">
         <li class="card theme-card">
           <div class="theme-card__art" style="background: var(--tint-ochre)">
             <div class="theme-card__inner"><span class="theme-card__rule" style="background: var(--ochre)" aria-hidden="true"></span><span class="theme-card__name">Hartley</span><span class="theme-card__sub">Classic serif</span></div>
@@ -876,61 +846,25 @@ img, svg { max-width: 100%; display: block; }
     </div>
   </section>
 
-  <!-- ===================== PaperVsDigital ===================== -->
-  <section class="band band--deep">
-    <div class="shell">
-      <div class="section-head rise">
-        <p class="eyebrow">The honest comparison</p>
-        <h2>Paper is beautiful. It just cannot count.</h2>
-        <p>Send both if you like — most people do. The QR code on the card leads here.</p>
-      </div>
-
-      <div class="versus">
-        <div class="card versus__col versus__col--paper rise">
-          <h3><span class="pill">Paper only</span></h3>
-          <ul>
-            <li><span aria-hidden="true">–</span><span>£3–6 per guest once you count printing, envelopes and postage.</span></li>
-            <li><span aria-hidden="true">–</span><span>Two to three weeks from proof to doormat, longer if you need a reprint.</span></li>
-            <li><span aria-hidden="true">–</span><span>A reply card that half your guests forget to post back.</span></li>
-            <li><span aria-hidden="true">–</span><span>A spreadsheet you maintain by hand from voicemails and texts.</span></li>
-            <li><span aria-hidden="true">–</span><span>Change the venue and the whole run is waste paper.</span></li>
-          </ul>
-        </div>
-
-        <div class="card versus__col versus__col--digital rise">
-          <h3><span class="badge">Imvite</span></h3>
-          <ul>
-            <li><span aria-hidden="true">✓</span><span>One payment from €29, whether you invite 40 people or 400.</span></li>
-            <li><span aria-hidden="true">✓</span><span>Live the moment you publish, and shareable in a message.</span></li>
-            <li><span aria-hidden="true">✓</span><span>RSVP in under a minute, on the phone already in their hand.</span></li>
-            <li><span aria-hidden="true">✓</span><span>Replies, headcounts and dietary notes collected for you.</span></li>
-            <li><span aria-hidden="true">✓</span><span>Change a detail and everyone sees it immediately.</span></li>
-          </ul>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ===================== PricingTiers + PackageBuilder ===================== -->
+  <!-- ===================== PricingTiers ===================== -->
   <section class="band" id="pricing">
     <div class="shell">
-      <div class="section-head rise">
+      <div class="section-head section-head--center rise">
         <p class="eyebrow">Pricing</p>
         <h2>Pay once. Keep it forever.</h2>
-        <p>Build the whole invitation before you decide. You only pay when you are ready to publish it.</p>
+        <p>Build the whole thing first. You only pay to publish.</p>
       </div>
 
       <div class="tiers">
         <article class="card tier rise">
           <h3 class="tier__name">Simple</h3>
           <p class="tier__price">€29 <small>once</small></p>
-          <p class="tier__for">One day, one guest list, everything you need to collect replies.</p>
+          <p class="tier__for">One day, one guest list.</p>
           <ul>
-            <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 13 4 4L19 7"/></svg> Six included themes</li>
-            <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 13 4 4L19 7"/></svg> Link, QR code and share card</li>
+            <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 13 4 4L19 7"/></svg> Six themes</li>
+            <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 13 4 4L19 7"/></svg> Link, QR code, share card</li>
             <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 13 4 4L19 7"/></svg> Up to 150 guests</li>
-            <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 13 4 4L19 7"/></svg> RSVP dashboard and CSV export</li>
-            <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 13 4 4L19 7"/></svg> Online until 60 days after the day</li>
+            <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 13 4 4L19 7"/></svg> RSVP dashboard</li>
           </ul>
           <a class="btn" href="#get-started">Choose Simple</a>
         </article>
@@ -939,13 +873,12 @@ img, svg { max-width: 100%; display: block; }
           <p class="tier__flag"><span class="badge badge--magenta">Most chosen</span></p>
           <h3 class="tier__name">Complete</h3>
           <p class="tier__price">€59 <small>once</small></p>
-          <p class="tier__for">Several days, different guests for each, and the invitation styled properly.</p>
+          <p class="tier__for">Several days, different guests for each.</p>
           <ul>
             <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 13 4 4L19 7"/></svg> Everything in Simple</li>
             <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 13 4 4L19 7"/></svg> All nine themes</li>
-            <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 13 4 4L19 7"/></svg> Multi-day schedule, per-guest</li>
-            <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 13 4 4L19 7"/></svg> Personal links, plus-ones, dietary</li>
-            <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 13 4 4L19 7"/></svg> Unlimited guests · online 12 months</li>
+            <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 13 4 4L19 7"/></svg> Multi-day, per guest</li>
+            <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 13 4 4L19 7"/></svg> Unlimited guests</li>
           </ul>
           <a class="btn btn--primary" href="#get-started">Choose Complete</a>
         </article>
@@ -953,34 +886,33 @@ img, svg { max-width: 100%; display: block; }
         <article class="card tier rise">
           <h3 class="tier__name">Studio</h3>
           <p class="tier__price">€99 <small>once</small></p>
-          <p class="tier__for">For planners, or a celebration that needs more than one invitation.</p>
+          <p class="tier__for">For planners, or more than one invitation.</p>
           <ul>
             <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 13 4 4L19 7"/></svg> Everything in Complete</li>
-            <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 13 4 4L19 7"/></svg> Three invitations, one guest list</li>
-            <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 13 4 4L19 7"/></svg> Imvite footer removed</li>
-            <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 13 4 4L19 7"/></svg> Print pack, press-ready</li>
-            <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 13 4 4L19 7"/></svg> Ten-year archive</li>
+            <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 13 4 4L19 7"/></svg> Three invitations</li>
+            <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 13 4 4L19 7"/></svg> No Imvite footer</li>
+            <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 13 4 4L19 7"/></svg> Print pack</li>
           </ul>
           <a class="btn" href="#get-started">Choose Studio</a>
         </article>
       </div>
 
-      <!-- --------- PackageBuilder --------- -->
-      <div class="builder">
-        <div class="card rise">
-          <p class="eyebrow">Build your own</p>
-          <h3 style="font-size: var(--step-2)">Start with Simple and add only what you need.</h3>
-          <p style="color: var(--ink-soft); font-size: var(--step--1); margin-block-start: 0.7rem;">
-            Every add-on can also be bought later, from inside your dashboard.
-          </p>
+      <!-- PackageBuilder — folded away so pricing reads as three tiers -->
+      <div class="builder-toggle rise">
+        <button class="btn" type="button" id="builder-btn" aria-expanded="false" aria-controls="builder">
+          Build your own instead
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+        </button>
+      </div>
 
-          <ul class="addons" id="addons" style="list-style: none;">
+      <div class="builder" id="builder" hidden>
+        <div class="card">
+          <h3 style="font-size: var(--step-2)">Start at €29 and add what you need.</h3>
+          <ul class="addons" id="addons">
             <li class="addon">
               <input type="checkbox" id="ad-themes" data-price="15">
               <label for="ad-themes">
-                <span class="addon__box" aria-hidden="true">
-                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><path d="m5 13 4 4L19 7"/></svg>
-                </span>
+                <span class="addon__box" aria-hidden="true"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><path d="m5 13 4 4L19 7"/></svg></span>
                 <span class="addon__name">All nine themes <em>Unlock the three premium designs</em></span>
                 <span class="addon__price">€15</span>
               </label>
@@ -988,29 +920,23 @@ img, svg { max-width: 100%; display: block; }
             <li class="addon">
               <input type="checkbox" id="ad-multiday" data-price="19">
               <label for="ad-multiday">
-                <span class="addon__box" aria-hidden="true">
-                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><path d="m5 13 4 4L19 7"/></svg>
-                </span>
-                <span class="addon__name">Multi-day schedule <em>Invite different guests to different days</em></span>
+                <span class="addon__box" aria-hidden="true"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><path d="m5 13 4 4L19 7"/></svg></span>
+                <span class="addon__name">Multi-day schedule <em>Different guests for different days</em></span>
                 <span class="addon__price">€19</span>
               </label>
             </li>
             <li class="addon">
               <input type="checkbox" id="ad-branding" data-price="19">
               <label for="ad-branding">
-                <span class="addon__box" aria-hidden="true">
-                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><path d="m5 13 4 4L19 7"/></svg>
-                </span>
-                <span class="addon__name">Remove the Imvite footer <em>Your invitation, nobody else's name on it</em></span>
+                <span class="addon__box" aria-hidden="true"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><path d="m5 13 4 4L19 7"/></svg></span>
+                <span class="addon__name">Remove the Imvite footer <em>Nobody else's name on it</em></span>
                 <span class="addon__price">€19</span>
               </label>
             </li>
             <li class="addon">
               <input type="checkbox" id="ad-slug" data-price="9">
               <label for="ad-slug">
-                <span class="addon__box" aria-hidden="true">
-                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><path d="m5 13 4 4L19 7"/></svg>
-                </span>
+                <span class="addon__box" aria-hidden="true"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><path d="m5 13 4 4L19 7"/></svg></span>
                 <span class="addon__name">Custom link <em>imvite.com/anna-and-luis</em></span>
                 <span class="addon__price">€9</span>
               </label>
@@ -1018,94 +944,32 @@ img, svg { max-width: 100%; display: block; }
             <li class="addon">
               <input type="checkbox" id="ad-print" data-price="15">
               <label for="ad-print">
-                <span class="addon__box" aria-hidden="true">
-                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><path d="m5 13 4 4L19 7"/></svg>
-                </span>
-                <span class="addon__name">Print pack <em>Press-ready PDF with your QR code, CMYK and bleed</em></span>
+                <span class="addon__box" aria-hidden="true"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><path d="m5 13 4 4L19 7"/></svg></span>
+                <span class="addon__name">Print pack <em>Press-ready PDF with your QR code</em></span>
                 <span class="addon__price">€15</span>
-              </label>
-            </li>
-            <li class="addon">
-              <input type="checkbox" id="ad-archive" data-price="19">
-              <label for="ad-archive">
-                <span class="addon__box" aria-hidden="true">
-                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><path d="m5 13 4 4L19 7"/></svg>
-                </span>
-                <span class="addon__name">Ten-year archive <em>Your invitation stays online for a decade</em></span>
-                <span class="addon__price">€19</span>
               </label>
             </li>
           </ul>
         </div>
 
-        <div class="card total rise">
+        <div class="card total">
           <h3 style="font-size: var(--step-1)">Your package</h3>
-
-          <ul class="total__rows" id="total-rows">
-            <li><span>Simple</span> <b>€29</b></li>
-          </ul>
-
+          <ul class="total__rows" id="total-rows"><li><span>Simple</span> <b>€29</b></li></ul>
           <p class="total__sum">
             <span>Total</span>
             <output id="total-sum" for="addons" aria-live="polite">€29</output>
           </p>
-
-          <p id="total-hint" class="total__note">
-            Nothing selected yet — Simple on its own already collects RSVPs.
-          </p>
-
-          <a class="btn btn--primary" href="#get-started" style="inline-size: 100%; margin-block-start: 1rem;">Start building</a>
+          <p id="total-hint" class="total__note">Simple on its own already collects RSVPs.</p>
+          <a class="btn btn--primary btn--block" href="#get-started" style="margin-block-start: 1rem;">Start building</a>
         </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ===================== Testimonials ===================== -->
-  <!--
-    PLACEHOLDER CONTENT. These are written examples, not real customers.
-    Replace every quote, name and detail with a real one before this page goes
-    live — inventing social proof is both a trust problem and, in the EU/UK, a
-    consumer-protection one.
-  -->
-  <section class="band band--deep">
-    <div class="shell">
-      <div class="section-head rise">
-        <p class="eyebrow">What hosts say</p>
-        <h2>The part nobody expects to enjoy.</h2>
-      </div>
-
-      <div class="quotes">
-        <figure class="card quote rise">
-          <blockquote>“We sent it on a Tuesday evening and had ninety replies by Thursday. My mother, who does not trust the internet, RSVP'd from the bus.”</blockquote>
-          <figcaption>
-            <span class="avatar avatar--indigo" aria-hidden="true">NR</span>
-            <span><b>Nadia R.</b><span>200 guests · Bristol</span></span>
-          </figcaption>
-        </figure>
-
-        <figure class="card quote rise">
-          <blockquote>“The multi-day thing sold it. Close family got the welcome dinner, everyone else got the reception, and nobody saw a day they weren't invited to.”</blockquote>
-          <figcaption>
-            <span class="avatar avatar--magenta" aria-hidden="true">TO</span>
-            <span><b>Tom &amp; Ola</b><span>Three days · Galway</span></span>
-          </figcaption>
-        </figure>
-
-        <figure class="card quote rise">
-          <blockquote>“I handed the caterer a spreadsheet with every headcount and dietary note already in it. That alone was worth the money.”</blockquote>
-          <figcaption>
-            <span class="avatar avatar--ochre" aria-hidden="true">JM</span>
-            <span><b>Jess M.</b><span>140 guests · Leeds</span></span>
-          </figcaption>
-        </figure>
       </div>
     </div>
   </section>
 
   <!-- ===================== FaqAccordion ===================== -->
-  <section class="band" id="faq">
+  <section class="band band--deep" id="faq">
     <div class="shell">
-      <div class="section-head rise">
+      <div class="section-head section-head--center rise">
         <p class="eyebrow">Questions</p>
         <h2>The things people ask first.</h2>
       </div>
@@ -1114,105 +978,54 @@ img, svg { max-width: 100%; display: block; }
         <details open>
           <summary>Do my guests need an app or an account?</summary>
           <div class="faq__body">
-            <p>No. They tap the link, read the invitation and reply. Nothing to install, nothing to sign up for, and no email address required to RSVP — which matters more than you would think for older guests.</p>
+            <p>No. They tap the link, read it, and reply. Nothing to install, and no email address needed to RSVP — which matters more than you would think for older guests.</p>
           </div>
         </details>
-
         <details>
           <summary>Can I change things after I have shared the link?</summary>
           <div class="faq__body">
-            <p>Yes. Edit anything and it updates immediately for everyone who opens it — the link never changes. Replies you have already collected are kept.</p>
-            <p>If you change the date or the venue, you can message everyone who has already replied straight from the dashboard.</p>
+            <p>Yes. Edit anything and it updates immediately for everyone. The link never changes and replies already collected are kept.</p>
           </div>
         </details>
-
         <details>
           <summary>What happens if I do not pay?</summary>
           <div class="faq__body">
-            <p>You can build the entire invitation for free and preview it on your own phone. Payment unlocks publishing: the live link, the QR code and RSVP collection. There is no time limit on a draft and no card required to start.</p>
+            <p>You can build the whole invitation free and preview it on your phone. Paying unlocks publishing: the live link, the QR code, and RSVP collection. No card needed to start, and no time limit on a draft.</p>
           </div>
         </details>
-
         <details>
-          <summary>How long does my invitation stay online?</summary>
+          <summary>How long does it stay online?</summary>
           <div class="faq__body">
-            <p>Sixty days after the event on Simple, twelve months on Complete and Studio. If you want to keep it as a memento, the ten-year archive add-on is €19 and can be bought at any point, including afterwards.</p>
+            <p>Sixty days after the event on Simple, twelve months on Complete and Studio. A ten-year archive is €19 and can be added at any time, including afterwards.</p>
           </div>
         </details>
-
         <details>
           <summary>Can I still send paper invitations?</summary>
           <div class="faq__body">
-            <p>Most people do both. The print pack gives you a press-ready PDF with your QR code on it, so the card stays the keepsake and the link does the counting.</p>
+            <p>Most people do both. The print pack gives you a press-ready PDF with your QR code, so the card stays the keepsake and the link does the counting.</p>
           </div>
         </details>
-
         <details>
           <summary>What do you do with my guests' details?</summary>
           <div class="faq__body">
-            <p>We store them so you can see your replies, and nothing else. We do not sell them, we do not market to your guests, and the whole guest list is deleted on a schedule you set after the event. You can export everything as a spreadsheet at any time.</p>
+            <p>We store them so you can see your replies, and nothing else. We do not sell them or market to your guests, and the list is deleted on a schedule you set after the event.</p>
           </div>
         </details>
       </div>
     </div>
   </section>
 
-  <!-- ===================== DashboardTeaser ===================== -->
-  <section class="band band--deep">
-    <div class="shell dash">
-      <div class="rise">
-        <p class="eyebrow">Your dashboard</p>
-        <h2>Every reply, in one place, as it happens.</h2>
-        <p class="lede" style="margin-block-start: 1rem;">
-          Headcounts per day, who has not replied yet, dietary notes and a
-          spreadsheet the caterer can actually use. It updates the moment
-          somebody taps Yes.
-        </p>
-        <p style="margin-block-start: 1.6rem;">
-          <a class="btn" href="#get-started">See a live example</a>
-        </p>
-      </div>
-
-      <div class="card dash__panel rise">
-        <div class="dash__stats">
-          <p class="stat stat--yes"><b>148</b><span>Coming</span></p>
-          <p class="stat stat--wait"><b>32</b><span>Waiting</span></p>
-          <p class="stat"><b>11</b><span>Can't make it</span></p>
-        </div>
-
-        <ul class="dash__list">
-          <li>
-            <span class="avatar avatar--indigo" aria-hidden="true">HF</span>
-            <span><em>The Hartley family</em> · 4 coming, all three days</span>
-            <span class="pill">2m ago</span>
-          </li>
-          <li>
-            <span class="avatar avatar--ochre" aria-hidden="true">OK</span>
-            <span><em>The Okafor family</em> · 2 coming, reception only</span>
-            <span class="pill">1h ago</span>
-          </li>
-          <li>
-            <span class="avatar avatar--magenta" aria-hidden="true">DP</span>
-            <span><em>Dan &amp; Priya</em> · 2 coming, one vegetarian</span>
-            <span class="pill">3h ago</span>
-          </li>
-        </ul>
-      </div>
-    </div>
-  </section>
-
-  <!-- ===================== CTA ===================== -->
-  <section class="band" id="get-started">
+  <!-- ===================== ClosingCta ===================== -->
+  <section class="band" id="get-started" style="overflow: clip;">
     <div class="shell cta-strip rise">
       <p class="badge badge--paper"><span aria-hidden="true">●</span> Free to build · pay when you publish</p>
-      <h2>Make the invitation first. Decide afterwards.</h2>
-      <p class="lede" style="max-inline-size: 46ch;">
-        Start with a theme and your two names. You will know within ten minutes
-        whether this is the one.
+      <h2>Start with your two names.</h2>
+      <p class="lede" style="max-inline-size: 34ch;">
+        You will know in ten minutes whether this is the one.
       </p>
-      <p style="display:flex; flex-wrap:wrap; gap:0.9rem; justify-content:center;">
+      <p style="display:flex; flex-wrap:wrap; gap:1rem; justify-content:center;">
         <a class="btn btn--primary btn--lg" href="#get-started">Create your invitation</a>
-        <a class="btn btn--ghost" href="demo/">View demo</a>
+        <a class="btn btn--ghost" href="demo/">See a real one</a>
       </p>
     </div>
   </section>
@@ -1229,27 +1042,15 @@ img, svg { max-width: 100%; display: block; }
         </a>
         <p class="foot__blurb">Digital invitations with RSVP, for weddings and the other days that matter.</p>
       </div>
-
       <div>
         <h4>Product</h4>
         <ul>
+          <li><a href="#how">How it works</a></li>
+          <li><a href="demo/">Live demo</a></li>
           <li><a href="#themes">Themes</a></li>
           <li><a href="#pricing">Pricing</a></li>
-          <li><a href="#how">How it works</a></li>
-          <li><a href="#faq">FAQ</a></li>
         </ul>
       </div>
-
-      <div>
-        <h4>Occasions</h4>
-        <ul>
-          <li><a href="#themes">Weddings</a></li>
-          <li><a href="#themes">Engagements</a></li>
-          <li><a href="#themes">Save the date</a></li>
-          <li><a href="#themes">Birthdays</a></li>
-        </ul>
-      </div>
-
       <div>
         <h4>Company</h4>
         <ul>
@@ -1259,7 +1060,6 @@ img, svg { max-width: 100%; display: block; }
         </ul>
       </div>
     </div>
-
     <div class="foot__bottom">
       <span>© 2026 Imvite. All rights reserved.</span>
       <span>Made for the people who have to count the chairs.</span>
@@ -1268,14 +1068,8 @@ img, svg { max-width: 100%; display: block; }
 </footer>
 
 <script>
-/* ==========================================================================
-   Vanilla JS. Everything below is progressive enhancement: with JS disabled
-   the page is fully readable, the FAQ opens (native <details>), and the
-   package builder still ticks its checkboxes — only the running total is lost.
-   ========================================================================== */
 (function () {
   'use strict';
-
   var reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   /* ---------- entrance fades ---------- */
@@ -1284,88 +1078,118 @@ img, svg { max-width: 100%; display: block; }
     risers.forEach(function (el) { el.classList.add('is-in'); });
   } else {
     var io = new IntersectionObserver(function (entries) {
-      entries.forEach(function (entry) {
-        if (!entry.isIntersecting) return;
-        entry.target.classList.add('is-in');
-        io.unobserve(entry.target);
+      entries.forEach(function (e) {
+        if (!e.isIntersecting) return;
+        e.target.classList.add('is-in');
+        io.unobserve(e.target);
       });
     }, { rootMargin: '0px 0px -8% 0px', threshold: 0.06 });
     risers.forEach(function (el, i) {
-      el.style.transitionDelay = Math.min(i % 4, 3) * 55 + 'ms';
+      el.style.transitionDelay = Math.min(i % 3, 2) * 60 + 'ms';
       io.observe(el);
     });
   }
+
+  /* ---------- full-screen menu ---------- */
+  var menu = document.getElementById('menu');
+  var menuBtn = document.getElementById('menu-btn');
+  var menuIcon = document.getElementById('menu-icon');
+  var BARS = 'M4 7h16M4 12h16M4 17h16';
+  var CROSS = 'M6 6l12 12M18 6L6 18';
+
+  function setMenu(open) {
+    menu.hidden = !open;
+    menuBtn.setAttribute('aria-expanded', String(open));
+    menuBtn.setAttribute('aria-label', open ? 'Close menu' : 'Open menu');
+    menuIcon.querySelector('path').setAttribute('d', open ? CROSS : BARS);
+    document.body.classList.toggle('is-locked', open);
+    if (open) {
+      var first = menu.querySelector('a');
+      if (first) first.focus();
+    } else {
+      menuBtn.focus();
+    }
+  }
+  menuBtn.addEventListener('click', function () {
+    setMenu(menu.hidden);
+  });
+  menu.addEventListener('click', function (e) {
+    if (e.target.closest('a')) setMenu(false);
+  });
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape' && !menu.hidden) setMenu(false);
+  });
+  // A resize into the desktop breakpoint must not leave the body scroll-locked.
+  window.matchMedia('(min-width: 60rem)').addEventListener('change', function (m) {
+    if (m.matches && !menu.hidden) setMenu(false);
+  });
 
   /* ---------- theme rail ---------- */
   var rail = document.getElementById('theme-rail');
   if (rail) {
     var step = function () {
       var first = rail.firstElementChild;
-      return first ? first.getBoundingClientRect().width + 20 : 280;
+      return first ? first.getBoundingClientRect().width + 20 : 260;
     };
-    var scrollBy = function (dir) {
+    var scrollRail = function (dir) {
       rail.scrollBy({ left: dir * step(), behavior: reduced ? 'auto' : 'smooth' });
     };
     var prev = document.querySelector('[data-rail-prev]');
     var next = document.querySelector('[data-rail-next]');
-    if (prev) prev.addEventListener('click', function () { scrollBy(-1); });
-    if (next) next.addEventListener('click', function () { scrollBy(1); });
-
-    // Arrow keys when the rail itself has focus.
+    if (prev) prev.addEventListener('click', function () { scrollRail(-1); });
+    if (next) next.addEventListener('click', function () { scrollRail(1); });
     rail.addEventListener('keydown', function (e) {
-      if (e.key === 'ArrowRight') { e.preventDefault(); scrollBy(1); }
-      if (e.key === 'ArrowLeft')  { e.preventDefault(); scrollBy(-1); }
+      if (e.key === 'ArrowRight') { e.preventDefault(); scrollRail(1); }
+      if (e.key === 'ArrowLeft')  { e.preventDefault(); scrollRail(-1); }
     });
   }
 
   /* ---------- package builder ---------- */
-  var BASE = { label: 'Simple', price: 29 };
-  var addons = Array.prototype.slice.call(
-    document.querySelectorAll('#addons input[type="checkbox"]')
-  );
-  var rowsEl = document.getElementById('total-rows');
-  var sumEl  = document.getElementById('total-sum');
-  var hintEl = document.getElementById('total-hint');
+  var builder = document.getElementById('builder');
+  var builderBtn = document.getElementById('builder-btn');
+  builderBtn.addEventListener('click', function () {
+    var open = builder.hidden;
+    builder.hidden = !open;
+    builderBtn.setAttribute('aria-expanded', String(open));
+    builderBtn.firstChild.textContent = open ? 'Hide the builder ' : 'Build your own instead ';
+  });
 
+  var BASE = { label: 'Simple', price: 29 };
+  var addons = Array.prototype.slice.call(document.querySelectorAll('#addons input[type="checkbox"]'));
+  var rowsEl = document.getElementById('total-rows');
+  var sumEl = document.getElementById('total-sum');
+  var hintEl = document.getElementById('total-hint');
   var money = function (n) { return '€' + n; };
 
   function labelFor(input) {
     var el = document.querySelector('label[for="' + input.id + '"] .addon__name');
     if (!el) return 'Add-on';
-    // Take only the first text node: the <em> holds the description.
     return (el.childNodes[0] && el.childNodes[0].textContent || '').trim();
   }
 
   function render() {
-    if (!rowsEl || !sumEl) return;
-
     var total = BASE.price;
     var chosen = addons.filter(function (i) { return i.checked; });
-
     var html = '<li><span>' + BASE.label + '</span> <b>' + money(BASE.price) + '</b></li>';
     chosen.forEach(function (input) {
       var price = Number(input.getAttribute('data-price')) || 0;
       total += price;
       html += '<li><span>' + labelFor(input) + '</span> <b>' + money(price) + '</b></li>';
     });
-
     rowsEl.innerHTML = html;
     sumEl.textContent = money(total);
 
-    if (hintEl) {
-      if (chosen.length === 0) {
-        hintEl.textContent = 'Nothing selected yet — Simple on its own already collects RSVPs.';
-      } else if (total >= 59 && total < 99) {
-        hintEl.textContent = 'At this total, Complete (€59) may already include what you have picked. Worth comparing.';
-      } else if (total >= 99) {
-        hintEl.textContent = 'Studio is €99 and includes most of these. Compare before you buy.';
-      } else {
-        hintEl.textContent = chosen.length + (chosen.length === 1 ? ' add-on' : ' add-ons') + ' selected. Every one can also be added later.';
-      }
+    if (chosen.length === 0) {
+      hintEl.textContent = 'Simple on its own already collects RSVPs.';
+    } else if (total >= 59 && total < 99) {
+      hintEl.textContent = 'Complete is €59 and may already include these. Worth comparing.';
+    } else if (total >= 99) {
+      hintEl.textContent = 'Studio is €99 and includes most of these. Compare before you buy.';
+    } else {
+      hintEl.textContent = chosen.length + (chosen.length === 1 ? ' add-on' : ' add-ons') + ' selected.';
     }
   }
-
-  addons.forEach(function (input) { input.addEventListener('change', render); });
+  addons.forEach(function (i) { i.addEventListener('change', render); });
   render();
 })();
 </script>

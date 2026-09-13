@@ -9,7 +9,15 @@ python3 -m http.server 8000 --directory landing
 
 ## Design language
 
-Soft neo-brutalism. The rules the file holds itself to:
+Soft neo-brutalism, with the information density rebalanced against Gumroad
+after a review: one idea per section, a hero carrying type and nothing else,
+and imagery as authored flat vector bleeding off the viewport edges.
+
+**No stock photography.** Faces of real people cannot be licensed for
+advertising without a model release, and the free-photo sites do not grant one.
+Every shape on the page is SVG written here.
+
+The rules the file holds itself to:
 
 - **Thick ink outlines** on every card, button, input and badge — `2px` on small
   elements, `3px` on cards and primary buttons, always `--ink`.
@@ -33,9 +41,9 @@ Soft neo-brutalism. The rules the file holds itself to:
 ## Porting to Vue
 
 Every `<section>` maps to one SFC and is commented with its intended name:
-`SiteNav`, `HeroPanel`, `HowItWorks`, `ThemeGallery`, `PaperVsDigital`,
-`PricingTiers`, `PackageBuilder`, `Testimonials`, `FaqAccordion`,
-`DashboardTeaser`, `SiteFooter`.
+`SiteNav`, `MenuOverlay`, `HeroPanel`, `HowItWorks`, `GuestPreview`,
+`ThemeGallery`, `PricingTiers`, `PackageBuilder`, `FaqAccordion`,
+`ClosingCta`, `SiteFooter`.
 
 Move the `:root` block to `tokens.css` first — no component holds a hard-coded
 colour, radius or border width, so the rest is mechanical. The ~23 inline
@@ -48,14 +56,11 @@ they become props.
    which is a third-party connection and has produced GDPR findings in Germany.
    `@fontsource/fraunces` and `@fontsource/plus-jakarta-sans`, or
    google-webfonts-helper for the raw woff2.
-2. **Replace the testimonials.** They are written placeholders, not customers,
-   and are marked as such in an HTML comment. Inventing social proof is a trust
-   problem and, in the EU and UK, a consumer-protection one.
-3. **Create `og.png`** (1200×630). The meta tags point at it; it does not exist,
+2. **Create `og.png`** (1200×630). The meta tags point at it; it does not exist,
    so the link currently previews with no image.
-4. **Wire the CTAs.** Every button points at `#get-started`. `#login`,
+3. **Wire the CTAs.** Every button points at `#get-started`. `#login`,
    `#privacy`, `#terms` and `#contact` are dead anchors.
-5. **Set the CSP.** With the fonts self-hosted:
+4. **Set the CSP.** With the fonts self-hosted:
 
    ```
    Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline';
